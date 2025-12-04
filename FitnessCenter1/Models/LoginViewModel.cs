@@ -1,4 +1,6 @@
-﻿namespace FitnessCenter1.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FitnessCenter1.Models
 {
     public class LoginViewModel
     {

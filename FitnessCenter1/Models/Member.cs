@@ -1,14 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
+using System.ComponentModel.DataAnnotations.Schema;
 namespace FitnessCenter1.Models
 {
+    [Table("Members")]
     public class Member
-    { 
+    {
+        [Key]
         public int MemberID { get; set; }
 
-        [Required(ErrorMessage ="Ad zorunludur")]
-        [Display(Name ="Ad")]
-        [MaxLength(25,ErrorMessage ="Ad 25 karakterden fazla olamaz")]
+        [Required(ErrorMessage = "Ad zorunludur")]
+        [Display(Name = "Ad")]
+        [MaxLength(25, ErrorMessage = "Ad 25 karakterden fazla olamaz")]
         public String MemberName { get; set; }
 
 
@@ -21,12 +23,12 @@ namespace FitnessCenter1.Models
         [Required(ErrorMessage = "Kullanıcı adı zorunludur")]
         [Display(Name = "Kullanıcı adı")]
         [MaxLength(25, ErrorMessage = "Kullanıcı adı 25 karakterden fazla olamaz")]
-        public String MemberUserName{ get; set; }
+        public String MemberUserName { get; set; }
 
 
         [Required(ErrorMessage = "E-mail zorunludur")]
         [Display(Name = "E-mail")]
-        [EmailAddress(ErrorMessage ="Lütfen geçerli bir e-mail formatı giriniz")]
+        [EmailAddress(ErrorMessage = "Lütfen geçerli bir e-mail formatı giriniz")]
         public String MemberEmail { get; set; }
 
 

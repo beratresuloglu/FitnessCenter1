@@ -4,6 +4,7 @@ namespace FitnessCenter1.Models
 {
     public class Admin
     {
+        [Key]
         public int AdminID { get; set; }
 
         [Required(ErrorMessage = "Kullanıcı Adı Zorunlu")]

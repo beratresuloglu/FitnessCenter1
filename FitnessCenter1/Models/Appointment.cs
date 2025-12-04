@@ -1,7 +1,10 @@
-﻿namespace FitnessCenter1.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FitnessCenter1.Models
 {
     public class Appointment //Randevu
     {
+        [Key]
         public int AppointmentID { get; set; }
         public int FitnessCenterID { get; set; }
         public int MemberID { get; set; }

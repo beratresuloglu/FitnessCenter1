@@ -4,14 +4,22 @@ namespace FitnessCenter1.Models
 {
     public class FitnessCenter
     {
-        public int FitnessCenterID { get; set; }
-        public String FitnessCenterName { get; set; }
-        public String FitnessCenterAdress { get; set; }
-        public string FitnessCenterWorkingHours {  get; set; }
+        [Key]
+        public int ID { get; set; }
 
-        public FitnessCenter()
-        {
-            
-        }
+        [Required(ErrorMessage = "Şube adı zorunludur")]
+        [Display(Name = "Şube adı")]
+        [MaxLength(25, ErrorMessage = "Şube adı 50 karakterden fazla olamaz")]
+        public String Name { get; set; }
+
+
+        [Display(Name = "Şube adresi")]
+        public String Address { get; set; }
+
+
+        [Required(ErrorMessage = "Çalışma saatleri zorunludur")]
+        [Display(Name = "Çalışma saatleri")]
+        public string WorkingHours { get; set; }
+
     }
 }

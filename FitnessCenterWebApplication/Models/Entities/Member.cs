@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FitnessCenterWebApplication.Models.Entities
 {
-    public class Member
+    public class Member 
     {
         [Key]
         public int Id { get; set; }

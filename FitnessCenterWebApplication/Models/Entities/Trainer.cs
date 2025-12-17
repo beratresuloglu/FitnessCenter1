@@ -52,7 +52,7 @@ namespace FitnessCenterWebApplication.Models.Entities
         public GymCenter GymCenter { get; set; } = null!;
 
         [ForeignKey(nameof(UserId))]
-        public ApplicationUser? User { get; set; }
+        public User? User { get; set; }
 
         public ICollection<TrainerService> TrainerServices { get; set; } = new List<TrainerService>();
         public ICollection<TrainerAvailability> Availabilities { get; set; } = new List<TrainerAvailability>();

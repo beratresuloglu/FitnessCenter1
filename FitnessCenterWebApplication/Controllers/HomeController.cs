@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using FitnessCenterWebApplication.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FitnessCenterWebApplication.Controllers
@@ -19,6 +20,18 @@ namespace FitnessCenterWebApplication.Controllers
         }
 
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult Admin()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Member")]
+        public IActionResult Member()
         {
             return View();
         }

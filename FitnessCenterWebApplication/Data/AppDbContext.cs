@@ -4,7 +4,7 @@ using FitnessCenterWebApplication.Models.Entities;
 
 namespace FitnessCenterWebApplication.Data
 {
-    public class AppDbContext : IdentityDbContext<ApplicationUser>
+    public class AppDbContext : IdentityDbContext<User>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -152,7 +152,7 @@ namespace FitnessCenterWebApplication.Data
             });
 
             // ApplicationUser Configuration
-            modelBuilder.Entity<ApplicationUser>(entity =>
+            modelBuilder.Entity<User>(entity =>
             {
                 entity.Property(e => e.FirstName).HasMaxLength(50);
                 entity.Property(e => e.LastName).HasMaxLength(50);

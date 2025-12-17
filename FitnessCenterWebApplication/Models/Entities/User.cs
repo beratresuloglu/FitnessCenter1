@@ -2,7 +2,7 @@
 
 namespace FitnessCenterWebApplication.Models.Entities
 {
-    public class ApplicationUser : IdentityUser
+    public class User : IdentityUser
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;

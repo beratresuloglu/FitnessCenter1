@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using FitnessCenterWebApplication.Data;
 using FitnessCenterWebApplication.Models.Entities;
-using FitnessCenterWebApplication.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace FitnessCenterWebApplication.Services
 {
@@ -11,14 +12,14 @@ namespace FitnessCenterWebApplication.Services
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<SeedService>>();
 
             try
             {
                 //Ensure the database is ready
                 logger.LogInformation("Ensuring the database is created");
-                await context.Database.EnsureCreatedAsync();
+                await context.Database.MigrateAsync();
 
                 //Add roles
                 logger.LogInformation("Seeding roles");
@@ -30,7 +31,7 @@ namespace FitnessCenterWebApplication.Services
                 var adminEmail = "b231210050@sakarya.edu.tr";
                 if (await userManager.FindByEmailAsync(adminEmail) == null)
                 {
-                    var adminUser = new ApplicationUser
+                    var adminUser = new User
                     {
                         UserName = adminEmail,
                         Email = adminEmail,
@@ -41,7 +42,7 @@ namespace FitnessCenterWebApplication.Services
                         SecurityStamp = Guid.NewGuid().ToString()
 
                     };
-                    var result = await userManager.CreateAsync(adminUser, "Admin123!");
+                    var result = await userManager.CreateAsync(adminUser, "sau");
                     if (result.Succeeded)
                     {
                         logger.LogInformation("Assigning admin role to the admin user");

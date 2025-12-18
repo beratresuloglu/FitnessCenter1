@@ -26,8 +26,18 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+
                         @if (User.IsInRole("Admin"))
                         {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Service" asp-action="Index">Hizmetler</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Trainer" asp-action="Index">Eğitmenler</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Appointment" asp-action="Index">Randevu İşlemleri</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Admin">Admin Panel</a>
                             </li>
@@ -35,10 +45,19 @@
                         @if (User.IsInRole("Member"))
                         {
                             <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Service" asp-action="Index">Hizmetler</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Trainer" asp-action="Index">Eğitmenler</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Appointment" asp-action="Index">Randevular</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Member">Member Panel</a>
                             </li>
                         }
-                        
+
                         <partial name="_LoginPartial" />
                     </ul>
                 </div>

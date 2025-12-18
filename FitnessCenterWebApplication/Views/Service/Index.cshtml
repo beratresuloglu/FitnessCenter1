@@ -1,0 +1,175 @@
+﻿@model IEnumerable<FitnessCenterWebApplication.Models.Entities.Service>
+
+@{
+    ViewData["Title"] = "Hizmetlerimiz";
+}
+
+<div class="container mt-4">
+    <!-- Sayfa Başlığı -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4 text-center mb-3">
+                <i class="fas fa-dumbbell me-2"></i>Hizmetlerimiz
+            </h1>
+            <p class="text-center text-muted">Fitness merkezimizde sunduğumuz profesyonel hizmetleri keşfedin</p>
+        </div>
+    </div>
+
+    <!-- Admin için Ekleme Butonu -->
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <a asp-action="Create" class="btn btn-success">
+                    <i class="fas fa-plus me-1"></i>Yeni Hizmet Ekle
+                </a>
+            </div>
+        </div>
+    }
+
+    <!-- Başarı/Hata Mesajları -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Hizmetler Kartları -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var service in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm hover-card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-star me-2"></i>@service.Name
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text text-muted">@service.Description</p>
+
+                            <div class="service-details mt-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>Süre:
+                                    </span>
+                                    <span class="fw-bold">@service.DurationMinutes dakika</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">
+                                        <i class="fas fa-tag me-1"></i>Ücret:
+                                    </span>
+                                    <span class="fw-bold text-success">@service.Price.ToString("C2")</span>
+                                </div>
+
+                                @if (service.GymCenter != null)
+                                {
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">
+                                            <i class="fas fa-building me-1"></i>Salon:
+                                        </span>
+                                        <span class="badge bg-info">@service.GymCenter.Name</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    // 1. SOL KÖŞE: Düzenle Butonu
+                                    // btn-group div'ini kaldırdık, böylece bu buton sol tarafta tek başına kaldı
+                                    <a asp-action="Edit" asp-route-id="@service.Id" class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i> Düzenle
+                                    </a>
+
+                                    // 2. SAĞ KÖŞE: Sil Butonu
+                                    // Bu buton ikinci eleman olduğu için justify-content-between onu en sağa itecek
+                                    <a asp-action="Delete" asp-route-id="@service.Id" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i> Sil
+                                    </a>
+                                }
+                                else if (User.Identity.IsAuthenticated)
+                                {
+                                    // Kullanıcı giriş yapmışsa Randevu butonunu sağa yaslamak için 'ms-auto' ekleyebilirsin
+                                    // Eğer sola yaslı kalsın istersen 'ms-auto'yu kaldırabilirsin.
+                                    <a asp-controller="Appointment" asp-action="Create" asp-route-serviceId="@service.Id"
+                                       class="btn btn-sm btn-success ms-auto">
+                                        <i class="fas fa-calendar-plus me-1"></i>Randevu Al
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Hiç Hizmet Yoksa -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-info text-center" role="alert">
+                    <i class="fas fa-info-circle fa-3x mb-3"></i>
+                    <h4>Henüz Hizmet Bulunmuyor</h4>
+                    <p>Şu anda sistemde kayıtlı hizmet bulunmamaktadır.</p>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-action="Create" class="btn btn-primary mt-2">
+                            <i class="fas fa-plus me-1"></i>İlk Hizmeti Ekle
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Özel CSS -->
+<style>
+    .hover-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    }
+
+    .card-header {
+        border-bottom: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .service-details {
+        border-top: 1px solid #e9ecef;
+        padding-top: 15px;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.4em 0.6em;
+    }
+
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+
+<!-- Font Awesome CDN (eğer yoksa) -->
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+}

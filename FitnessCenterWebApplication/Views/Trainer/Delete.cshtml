@@ -1,0 +1,73 @@
+﻿@model FitnessCenterWebApplication.Models.Entities.Trainer
+
+@{
+    ViewData["Title"] = "Eğitmeni Sil";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-times me-2"></i>Eğitmen Silme Onayı
+                    </h4>
+                </div>
+
+                <div class="card-body">
+                    <div class="alert alert-warning text-center">
+                        <strong>Bu eğitmeni silmek istediğinize emin misiniz?</strong>
+                        <br />
+                        <small>Bu işlem eğitmeni pasife alacak ve sistem girişini engelleyecektir.</small>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+                        {
+                            <img src="@Model.ProfileImageUrl" alt="@Model.FullName"
+                                 class="rounded-circle img-thumbnail shadow-sm"
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-secondary"
+                                 style="width: 120px; height: 120px;">
+                                <i class="fas fa-user fa-4x"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <dl class="row px-3">
+                        <dt class="col-sm-5 text-muted">Ad Soyad:</dt>
+                        <dd class="col-sm-7 fw-bold fs-5">@Model.FullName</dd>
+
+                        <dt class="col-sm-5 text-muted">Uzmanlık:</dt>
+                        <dd class="col-sm-7">@Model.Specialization</dd>
+
+                        <dt class="col-sm-5 text-muted">Spor Salonu:</dt>
+                        <dd class="col-sm-7">
+                            <span class="badge bg-info text-dark">
+                                @Model.GymCenter?.Name
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-5 text-muted">E-Posta:</dt>
+                        <dd class="col-sm-7">@Model.Email</dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post" class="d-flex justify-content-between mt-4 border-top pt-3">
+                        <input type="hidden" asp-for="Id" />
+
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>İptal
+                        </a>
+
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash-alt me-1"></i>Evet, Sil
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

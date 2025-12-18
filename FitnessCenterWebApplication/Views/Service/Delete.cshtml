@@ -1,0 +1,47 @@
+﻿@model FitnessCenterWebApplication.Models.Entities.Service
+
+@{
+    ViewData["Title"] = "Hizmeti Sil";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Silme Onayı</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning text-center">
+                        <strong>Bu hizmeti silmek istediğinize emin misiniz?</strong>
+                        <br />
+                        <small>Bu işlem hizmeti pasife alacaktır.</small>
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Hizmet Adı:</dt>
+                        <dd class="col-sm-8 fw-bold">@Model.Name</dd>
+
+                        <dt class="col-sm-4">Spor Salonu:</dt>
+                        <dd class="col-sm-8">@Model.GymCenter?.Name</dd>
+
+                        <dt class="col-sm-4">Ücret:</dt>
+                        <dd class="col-sm-8">@Model.Price.ToString("C2")</dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post" class="d-flex justify-content-between mt-4">
+                        <input type="hidden" asp-for="Id" />
+
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>İptal
+                        </a>
+
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash-alt me-1"></i>Evet, Sil
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

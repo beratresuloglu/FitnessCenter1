@@ -29,8 +29,9 @@ namespace FitnessCenterWebApplication.Models.Entities
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         // Foreign Keys
-        [Required]
-        public int GymCenterId { get; set; }
+        [Required(ErrorMessage = "Lütfen bir spor salonu seçiniz")]
+        public int? GymCenterId { get; set; }
+
 
         // Navigation Properties
         [ForeignKey(nameof(GymCenterId))]

@@ -1,0 +1,61 @@
+﻿@model FitnessCenterWebApplication.Models.Entities.Appointment
+
+@{
+    ViewData["Title"] = "Randevu Onayı";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Randevu Onayı
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-calendar-check text-success fa-3x mb-3"></i>
+                        <h4>Bu randevuyu onaylıyor musunuz?</h4>
+                        <p class="text-muted">Onay işleminden sonra üye bilgilendirilecektir.</p>
+                    </div>
+
+                    <div class="bg-light p-3 rounded border mb-4">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Üye:</dt>
+                            <dd class="col-sm-8 fw-bold text-primary">
+                                @(Model.Member?.User?.FirstName ?? "Üye") @(Model.Member?.User?.LastName ?? "")
+                            </dd>
+
+                            <dt class="col-sm-4">Hizmet:</dt>
+                            <dd class="col-sm-8">@Model.Service?.Name</dd>
+
+                            <dt class="col-sm-4">Tarih:</dt>
+                            <dd class="col-sm-8">@Model.AppointmentDate.ToString("dd MMMM yyyy")</dd>
+
+                            <dt class="col-sm-4">Saat:</dt>
+                            <dd class="col-sm-8">
+                                @Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")
+                            </dd>
+
+                            <dt class="col-sm-4">Ücret:</dt>
+                            <dd class="col-sm-8 text-success fw-bold">@Model.TotalPrice.ToString("C2")</dd>
+                        </dl>
+                    </div>
+
+                    <form asp-action="Approve" method="post" class="d-flex justify-content-between">
+                        <input type="hidden" asp-for="Id" />
+
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                        </a>
+
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="fas fa-check me-1"></i>Evet, Onayla
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

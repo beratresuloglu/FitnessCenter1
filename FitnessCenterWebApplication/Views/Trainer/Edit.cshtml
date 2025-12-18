@@ -1,0 +1,149 @@
+﻿@model FitnessCenterWebApplication.Models.Entities.Trainer
+
+@{
+    ViewData["Title"] = "Eğitmeni Güncelle";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12 text-center">
+            <h1 class="display-5 text-primary">
+                <i class="fas fa-user-edit me-2"></i>Eğitmeni Güncelle
+            </h1>
+            <p class="text-muted">
+                Eğitmenin bilgilerini aşağıdan düzenleyebilirsiniz.
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-sm create-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-id-card me-2"></i>Eğitmen Bilgileri
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label fw-bold">
+                                    <i class="fas fa-user me-1"></i>Ad
+                                </label>
+                                <input asp-for="FirstName" class="form-control" placeholder="Örn: Ahmet" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label fw-bold">
+                                    <i class="fas fa-user me-1"></i>Soyad
+                                </label>
+                                <input asp-for="LastName" class="form-control" placeholder="Örn: Yılmaz" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label fw-bold">
+                                    <i class="fas fa-envelope me-1"></i>E-Posta
+                                </label>
+                                <input asp-for="Email" type="email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Phone" class="form-label fw-bold">
+                                    <i class="fas fa-phone me-1"></i>Telefon
+                                </label>
+                                <input asp-for="Phone" class="form-control" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label asp-for="Specialization" class="form-label fw-bold">
+                                    <i class="fas fa-certificate me-1"></i>Uzmanlık Alanı
+                                </label>
+                                <input asp-for="Specialization" class="form-control" />
+                                <span asp-validation-for="Specialization" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="ExperienceYears" class="form-label fw-bold">
+                                    <i class="fas fa-briefcase me-1"></i>Deneyim (Yıl)
+                                </label>
+                                <input asp-for="ExperienceYears" type="number" class="form-control" />
+                                <span asp-validation-for="ExperienceYears" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Bio" class="form-label fw-bold">
+                                <i class="fas fa-align-left me-1"></i>Biyografi
+                            </label>
+                            <textarea asp-for="Bio" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Bio" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ProfileImageUrl" class="form-label fw-bold">
+                                <i class="fas fa-image me-1"></i>Profil Resmi (URL)
+                            </label>
+                            <input asp-for="ProfileImageUrl" class="form-control" />
+                            <span asp-validation-for="ProfileImageUrl" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="GymCenterId" class="form-label fw-bold">
+                                <i class="fas fa-building me-1"></i>Görevli Olduğu Salon
+                            </label>
+                            <select asp-for="GymCenterId"
+                                    asp-items="ViewBag.GymCenters"
+                                    class="form-select">
+                                <option value="">-- Salon Seçiniz --</option>
+                            </select>
+                            <span asp-validation-for="GymCenterId" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                            </a>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Değişiklikleri Kaydet
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .create-card {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+        .create-card .card-header {
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+}

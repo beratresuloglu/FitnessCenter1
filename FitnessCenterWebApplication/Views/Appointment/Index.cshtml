@@ -1,0 +1,172 @@
+﻿@model IEnumerable<FitnessCenterWebApplication.Models.Entities.Appointment>
+
+@{
+    ViewData["Title"] = "Randevularım";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        @if (User.IsInRole("Admin")){
+            <div>
+                <h2 class="text-primary"><i class="fas fa-calendar-check me-2"></i>Randevular</h2>
+                <p class="text-muted mb-0">Tüm randevu taleplerini buradan takip edebilirsiniz.</p>
+            </div>
+        }
+        @if (User.IsInRole("Member"))
+        {
+            <a asp-action="Create" class="btn btn-success shadow-sm">
+                <i class="fas fa-plus me-1"></i>Yeni Randevu Al
+            </a>
+        }
+  
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Tarih</th>
+                            <th>Saat</th>
+                            <th>Hizmet</th>
+                            <th>Antrenör</th>
+                            <th>Üye</th>
+                            <th>Durum</th>
+                            <th class="text-center">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold">@item.AppointmentDate.ToString("dd.MM.yyyy")</td>
+                                    <td>
+                                        <i class="far fa-clock text-muted me-1"></i>
+                                        @item.StartTime.ToString(@"hh\:mm") - @item.EndTime.ToString(@"hh\:mm")
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">@item.Service?.Name</span>
+                                    </td>
+                                    <td>@item.Trainer?.FullName</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width:30px; height:30px;">
+                                                <i class="fas fa-user text-secondary"></i>
+                                            </div>
+                                            <span>@(item.Member?.User?.Email ?? "Üye Bilgisi Yok")</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (item.Status.ToString() == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark"><i class="fas fa-hourglass-half me-1"></i>Bekliyor</span>
+                                        }
+                                        else if (item.Status.ToString() == "Approved")
+                                        {
+                                            <span class="badge bg-success"><i class="fas fa-check me-1"></i>Onaylı</span>
+                                        }
+                                        else if (item.Status.ToString() == "Cancelled")
+                                        {
+                                            <span class="badge bg-danger"><i class="fas fa-times me-1"></i>İptal</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@item.Status</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+
+                                            @if (User.IsInRole("Admin") && item.Status.ToString() == "Pending")
+                                            {
+                                                <form asp-action="Approve" asp-route-id="@item.Id" method="get">
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Onayla">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            @if (item.Status.ToString() != "Cancelled")
+                                            {
+                                                <button type="button" class="btn btn-sm btn-warning text-dark"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#cancelModal"
+                                                        onclick="setCancelModal(@item.Id)"
+                                                        title="İptal Et">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            }
+
+                                            @* @if (User.IsInRole("Admin"))
+                                            {
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="Sil">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            } *@
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3 text-secondary"></i><br />
+                                    <h5>Henüz randevu kaydı bulunmamaktadır.</h5>
+                                    <p>Yeni bir randevu oluşturmak için sağ üstteki butonu kullanabilirsiniz.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="fas fa-exclamation-circle me-2"></i>Randevu İptali</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Cancel" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="cancelAppointmentId" />
+                    <div class="mb-3">
+                        <label for="reason" class="form-label fw-bold">İptal Nedeni:</label>
+                        <textarea name="reason" class="form-control" rows="3" required placeholder="Lütfen iptal nedenini belirtiniz..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                    <button type="submit" class="btn btn-warning">Randevuyu İptal Et</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <script>
+        // İptal butonuna basıldığında ID'yi modala taşıyan script
+        function setCancelModal(id) {
+            document.getElementById('cancelAppointmentId').value = id;
+        }
+    </script>
+}

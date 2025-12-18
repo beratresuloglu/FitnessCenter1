@@ -1,0 +1,122 @@
+﻿@model FitnessCenterWebApplication.Models.Entities.Appointment
+
+@{
+    ViewData["Title"] = "Yeni Randevu Oluştur";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12 text-center">
+            <h1 class="display-5 text-primary">
+                <i class="fas fa-calendar-plus me-2"></i>Randevu Al
+            </h1>
+            <p class="text-muted">
+                Size uygun antrenör ve saati seçerek hemen randevunuzu oluşturun.
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm create-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Randevu Detayları
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label asp-for="ServiceId" class="form-label fw-bold">
+                                <i class="fas fa-dumbbell me-1"></i>Hizmet Seçiniz
+                            </label>
+                            <select asp-for="ServiceId" class="form-select" asp-items="ViewBag.Services">
+                                <option value="">-- Bir Hizmet Seçin --</option>
+                            </select>
+                            <span asp-validation-for="ServiceId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="TrainerId" class="form-label fw-bold">
+                                <i class="fas fa-user-tie me-1"></i>Antrenör Seçiniz
+                            </label>
+                            <select asp-for="TrainerId" class="form-select" asp-items="ViewBag.Trainers">
+                                <option value="">-- Bir Antrenör Seçin --</option>
+                            </select>
+                            <span asp-validation-for="TrainerId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AppointmentDate" class="form-label fw-bold">
+                                <i class="fas fa-calendar-alt me-1"></i>Tarih
+                            </label>
+                            <input asp-for="AppointmentDate" type="date" class="form-control"
+                                   value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="StartTime" class="form-label fw-bold">
+                                    <i class="fas fa-hourglass-start me-1"></i>Başlangıç
+                                </label>
+                                <input asp-for="StartTime" type="time" class="form-control" />
+                                <span asp-validation-for="StartTime" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="EndTime" class="form-label fw-bold">
+                                    <i class="fas fa-hourglass-end me-1"></i>Bitiş
+                                </label>
+                                <input asp-for="EndTime" type="time" class="form-control" />
+                                <span asp-validation-for="EndTime" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Notes" class="form-label fw-bold">
+                                <i class="fas fa-sticky-note me-1"></i>Notlar (Opsiyonel)
+                            </label>
+                            <textarea asp-for="Notes" class="form-control" rows="2"
+                                      placeholder="Antrenöre iletmek istediğiniz özel bir durum var mı?"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check-circle me-1"></i>Randevu Oluştur
+                            </button>
+                        </div>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .create-card {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+        .create-card .card-header {
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+}

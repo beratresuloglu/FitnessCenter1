@@ -9,11 +9,17 @@ namespace FitnessCenterWebApplication.Controllers
     [Authorize]
     public class AiController : Controller
     {
-        // BURAYA GROQ'DAN ALDIĞIN 'gsk_' İLE BAŞLAYAN KEY'İ YAPIŞTIR
-        private const string GroqApiKey = "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";
+        // Konfigürasyon dosyalarına (appsettings.json) erişmek için gerekli servis
+        private readonly IConfiguration _configuration;
 
-        // Groq API Adresi
+        // Groq API Adresi (Sabit kalabilir)
         private const string ApiUrl = "https://api.groq.com/openai/v1/chat/completions";
+
+        // Constructor (Yapıcı Metot): Dependency Injection ile Configuration'ı alıyoruz
+        public AiController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
         [HttpGet]
         public IActionResult Index()
@@ -24,6 +30,16 @@ namespace FitnessCenterWebApplication.Controllers
         [HttpPost]
         public async Task<IActionResult> GeneratePlan(AiTrainerViewModel model)
         {
+            // 1. ADIM: API Key'i güvenli alandan okuyoruz
+            string groqApiKey = _configuration["GroqApiKey"];
+
+            // Key kontrolü: Eğer ayarlanmamışsa hata dönelim
+            if (string.IsNullOrEmpty(groqApiKey))
+            {
+                model.AiResponse = "Sistem Hatası: API Anahtarı bulunamadı. Lütfen yönetici ile iletişime geçin (appsettings kontrolü).";
+                return View("Index", model);
+            }
+
             if (!ModelState.IsValid)
             {
                 return View("Index", model);
@@ -31,15 +47,15 @@ namespace FitnessCenterWebApplication.Controllers
 
             try
             {
-                // 1. Prompt Hazırlığı
+                // 2. Prompt Hazırlığı
                 string userPrompt = $"Ben {model.Age} yaşında, {model.Weight} kg ağırlığında, {model.Height} cm boyunda bir {model.Gender} bireyim. " +
                                     $"Hareket seviyem: {model.ActivityLevel}. Temel hedefim: {model.Goal}. " +
                                     $"Bana maddeler halinde, emojiler kullanarak samimi bir spor hocası gibi haftalık antrenman ve beslenme tavsiyesi ver. Cevabı Türkçe ver.";
 
-                // 2. İstek Verisi (Groq, OpenAI formatını kullanır)
+                // 3. İstek Verisi (En güncel Llama 3.3 modeli ile)
                 var requestData = new
                 {
-                    model = "llama-3.3-70b-versatile", // En güncel ve güçlü Llama 3.3 modeli
+                    model = "llama-3.3-70b-versatile",
                     messages = new[]
                     {
                         new { role = "user", content = userPrompt }
@@ -48,8 +64,8 @@ namespace FitnessCenterWebApplication.Controllers
 
                 using (var client = new HttpClient())
                 {
-                    // Header'a API Key ekliyoruz
-                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {GroqApiKey}");
+                    // Key'i değişkenden alıp Header'a ekliyoruz
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {groqApiKey}");
 
                     var jsonContent = JsonConvert.SerializeObject(requestData);
                     var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
@@ -61,15 +77,13 @@ namespace FitnessCenterWebApplication.Controllers
                         var responseString = await response.Content.ReadAsStringAsync();
                         dynamic responseJson = JsonConvert.DeserializeObject(responseString);
 
-                        // Cevabı alıyoruz
                         string aiText = responseJson.choices[0].message.content;
                         model.AiResponse = aiText;
                     }
                     else
                     {
-                        // Hata durumunda detaylı mesajı gösterelim
                         var errorMsg = await response.Content.ReadAsStringAsync();
-                        model.AiResponse = $"Hata oluştu ({response.StatusCode}): {errorMsg}";
+                        model.AiResponse = $"API Bağlantı Hatası ({response.StatusCode}): {errorMsg}";
                     }
                 }
             }

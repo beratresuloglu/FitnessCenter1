@@ -452,7 +452,7 @@ namespace FitnessCenterWebApplication.Services
                             DayOfWeek = (DayOfWeek)day,
                             StartTime = new TimeSpan(9, 0, 0),
                             EndTime = new TimeSpan(12, 0, 0),
-                            IsAvailable = true,
+                            IsActive = true,
                             CreatedDate = DateTime.Now
                         });
 
@@ -462,7 +462,7 @@ namespace FitnessCenterWebApplication.Services
                             DayOfWeek = (DayOfWeek)day,
                             StartTime = new TimeSpan(14, 0, 0),
                             EndTime = new TimeSpan(18, 0, 0),
-                            IsAvailable = true,
+                            IsActive = true,
                             CreatedDate = DateTime.Now
                         });
                     }
@@ -474,7 +474,7 @@ namespace FitnessCenterWebApplication.Services
                         DayOfWeek = DayOfWeek.Saturday,
                         StartTime = new TimeSpan(10, 0, 0),
                         EndTime = new TimeSpan(14, 0, 0),
-                        IsAvailable = true,
+                        IsActive = true,
                         CreatedDate = DateTime.Now
                     });
                 }

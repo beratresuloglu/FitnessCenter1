@@ -28,14 +28,13 @@ namespace FitnessCenterWebApplication.Controllers
                 .Include(a => a.Service)
                 .Include(a => a.Trainer)
                 .Include(a => a.Member)
+                    .ThenInclude(m => m.User) // <-- BU SATIRI EKLEMELİSİN (Identity bilgilerini çeker)
                 .AsQueryable();
 
-            // Eğer Admin değilse, sadece kendi randevularını görsün
+            // Filtreleme mantığı aynı kalacak
             if (!User.IsInRole("Admin"))
             {
                 var user = await _userManager.GetUserAsync(User);
-                // Not: Member tablosu ile User tablosu arasında ilişki olduğunu varsayıyoruz.
-                // Eğer MemberId User tablosunda değilse, Member tablosundan Email ile eşleştirme yapılmalı.
                 var member = await _context.Members.FirstOrDefaultAsync(m => m.UserId == user.Id);
 
                 if (member != null)
@@ -44,12 +43,10 @@ namespace FitnessCenterWebApplication.Controllers
                 }
                 else
                 {
-                    // Üye kaydı yoksa boş liste dönebilir veya hata sayfasına yönlendirebiliriz
                     return View(new List<Appointment>());
                 }
             }
 
-            // Tarihe göre sırala (En yeni en üstte)
             var appointments = await query.OrderByDescending(a => a.AppointmentDate).ToListAsync();
             return View(appointments);
         }
@@ -69,49 +66,50 @@ namespace FitnessCenterWebApplication.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Appointment appointment)
         {
-            // 1. Navigation Propertyleri Validasyondan Çıkar
+            // Validasyon temizliği
             ModelState.Remove("Member");
             ModelState.Remove("Trainer");
             ModelState.Remove("Service");
-            ModelState.Remove("ApprovedBy"); // Admin onaylayacak
+            ModelState.Remove("ApprovedBy");
             ModelState.Remove("ApprovedDate");
+
+            // KULLANICI ARTIK ENDTIME GİRMİYOR, BİZ HESAPLAYACAĞIZ
+            ModelState.Remove("EndTime");
+
+            if (appointment.TrainerId <= 0) ModelState.AddModelError("TrainerId", "Antrenör seçilmedi.");
 
             if (ModelState.IsValid)
             {
-                // 2. Giriş Yapan Üyeyi Bul ve Ata
                 var user = await _userManager.GetUserAsync(User);
                 var member = await _context.Members.FirstOrDefaultAsync(m => m.UserId == user.Id);
+                if (member == null) return RedirectToAction("Create"); // Veya hata sayfasına
 
-                if (member == null)
-                {
-                    ModelState.AddModelError("", "Üye kaydınız bulunamadı. Lütfen profilinizi tamamlayın.");
-                    return ReloadView(appointment);
-                }
                 appointment.MemberId = member.Id;
 
-                // 3. Hizmet Fiyatını ve Süresini Çek
+                // --- KRİTİK NOKTA: Bitiş Saatini Otomatik Hesapla ---
                 var service = await _context.Services.FindAsync(appointment.ServiceId);
-                if (service == null) return NotFound();
+                if (service != null)
+                {
+                    appointment.TotalPrice = service.Price;
 
-                appointment.TotalPrice = service.Price;
-                // Bitiş saatini hizmet süresine göre otomatik ayarlayabiliriz veya kullanıcı seçimi kalabilir.
-                // Biz kullanıcı seçimine sadık kalalım ama süreyi kontrol edelim (Opsiyonel)
+                    // Başlangıç saatine hizmet süresini ekle = Bitiş Saati
+                    appointment.EndTime = appointment.StartTime.Add(TimeSpan.FromMinutes(service.DurationMinutes));
+                }
+                // ----------------------------------------------------
 
+                // Çakışma kontrolü (Backend tarafında son bir güvenlik önlemi olarak kalsın)
                 if (!await IsTrainerAvailable(appointment.TrainerId, appointment.AppointmentDate, appointment.StartTime, appointment.EndTime))
                 {
-                    ModelState.AddModelError("", "Seçilen saatlerde antrenör müsait değil. Lütfen başka bir saat seçiniz.");
+                    ModelState.AddModelError("", "Bu saat az önce doldu, lütfen başka saat seçiniz.");
                     return ReloadView(appointment);
                 }
 
-                // 5. Varsayılan Değerler
                 appointment.CreatedDate = DateTime.Now;
-                appointment.Status = AppointmentStatus.Pending; // Onay Bekliyor
-                appointment.IsApproved = false;
+                appointment.Status = AppointmentStatus.Pending;
 
                 _context.Add(appointment);
                 await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Randevu talebiniz başarıyla oluşturuldu. Onay bekleniyor.";
+                TempData["Success"] = "Randevu başarıyla oluşturuldu.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -146,13 +144,20 @@ namespace FitnessCenterWebApplication.Controllers
             var appointment = await _context.Appointments.FindAsync(id);
             if (appointment != null)
             {
+                // GÜNCELLEME: Karakter Sınırı Kontrolü (Backend)
+                if (!string.IsNullOrEmpty(reason) && reason.Length > 100)
+                {
+                    // 100 karakterden fazlasını kes
+                    reason = reason.Substring(0, 100);
+                }
+
                 appointment.Status = AppointmentStatus.Cancelled;
                 appointment.CancellationReason = reason;
-                appointment.UpdatedDate = DateTime.Now; // İptal zamanı
+                appointment.UpdatedDate = DateTime.Now;
 
                 _context.Update(appointment);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Randevu başarıyla iptal edildi.";
+                TempData["Success"] = "Randevu iptal edildi.";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -199,38 +204,6 @@ namespace FitnessCenterWebApplication.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        //// DELETE: Appointment/Delete/5 (Sadece Admin - Tamamen silmek isterse)
-        //[Authorize(Roles = "Admin")]
-        //public async Task<IActionResult> Delete(int? id)
-        //{
-        //    if (id == null) return NotFound();
-
-        //    var appointment = await _context.Appointments
-        //        .Include(a => a.Member)
-        //        .Include(a => a.Trainer)
-        //        .Include(a => a.Service)
-        //        .FirstOrDefaultAsync(m => m.Id == id);
-
-        //    if (appointment == null) return NotFound();
-
-        //    return View(appointment);
-        //}
-
-        //[HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
-        //[Authorize(Roles = "Admin")]
-        //public async Task<IActionResult> DeleteConfirmed(int id)
-        //{
-        //    var appointment = await _context.Appointments.FindAsync(id);
-        //    if (appointment != null)
-        //    {
-        //        _context.Appointments.Remove(appointment);
-        //        await _context.SaveChangesAsync();
-        //        TempData["Success"] = "Randevu kaydı tamamen silindi.";
-        //    }
-        //    return RedirectToAction(nameof(Index));
-        //}
-
         // Yardımcı Metot: View'ı tekrar doldurma (DRY prensibi)
         private IActionResult ReloadView(Appointment appointment)
         {
@@ -254,6 +227,103 @@ namespace FitnessCenterWebApplication.Controllers
                 );
 
             return !conflictingAppointment;
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetTrainersByService(int serviceId)
+        {
+            // TrainerService tablosunu kullanarak o hizmeti veren hocaları buluyoruz
+            var trainers = await _context.Trainers
+                .Where(t => t.IsActive && t.TrainerServices.Any(ts => ts.ServiceId == serviceId))
+                .Select(t => new
+                {
+                    id = t.Id,
+                    fullName = t.FullName
+                })
+                .ToListAsync();
+
+            return Json(trainers);
+        }
+
+        // 2. Eğitmen ve Tarihe Göre Dolu Saatleri Getir (JSON)
+        [HttpGet]
+        public async Task<JsonResult> GetBookedHours(int trainerId, DateTime date)
+        {
+            // O hocanın, o tarihteki iptal edilmemiş randevularını çekiyoruz
+            var appointments = await _context.Appointments
+                .Where(a => a.TrainerId == trainerId
+                            && a.AppointmentDate.Date == date.Date
+                            && a.Status != AppointmentStatus.Cancelled)
+                .Select(a => new
+                {
+                    start = a.StartTime.ToString(@"hh\:mm"),
+                    end = a.EndTime.ToString(@"hh\:mm")
+                })
+                .ToListAsync();
+
+            return Json(appointments);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetAvailableSlots(int trainerId, int serviceId, DateTime date)
+        {
+            // 1. Hizmet Süresi
+            var service = await _context.Services.FindAsync(serviceId);
+            if (service == null) return Json(new List<object>());
+            int duration = service.DurationMinutes;
+
+            // 2. Eğitmenin O GÜN (DayOfWeek) için tanımlı çalışma saatlerini çek
+            // Örn: Pazartesi günü hem 09:00-12:00 hem de 14:00-18:00 çalışıyor olabilir.
+            var availabilities = await _context.TrainerAvailabilities
+                .Where(ta => ta.TrainerId == trainerId && ta.DayOfWeek == date.DayOfWeek && ta.IsActive)
+                .OrderBy(ta => ta.StartTime)
+                .ToListAsync();
+
+            // Eğer o gün hiç kayıt yoksa eğitmen çalışmıyor demektir.
+            if (!availabilities.Any())
+            {
+                return Json(new List<object>()); // Boş liste döner
+            }
+
+            // 3. O günkü dolu randevuları çek
+            var bookedAppointments = await _context.Appointments
+                .Where(a => a.TrainerId == trainerId
+                            && a.AppointmentDate.Date == date.Date
+                            && a.Status != AppointmentStatus.Cancelled)
+                .ToListAsync();
+
+            var slots = new List<object>();
+
+            // 4. Her bir çalışma aralığı için slotları oluştur
+            foreach (var shift in availabilities)
+            {
+                TimeSpan currentSlot = shift.StartTime;
+                TimeSpan shiftEnd = shift.EndTime;
+
+                // Vardiya bitimine kadar döngü
+                while (currentSlot.Add(TimeSpan.FromMinutes(duration)) <= shiftEnd)
+                {
+                    var slotEnd = currentSlot.Add(TimeSpan.FromMinutes(duration));
+
+                    // Çakışma Kontrolü (Randevularla)
+                    bool isBooked = bookedAppointments.Any(a =>
+                        (currentSlot >= a.StartTime && currentSlot < a.EndTime) ||
+                        (slotEnd > a.StartTime && slotEnd <= a.EndTime) ||
+                        (currentSlot <= a.StartTime && slotEnd >= a.EndTime)
+                    );
+
+                    slots.Add(new
+                    {
+                        time = currentSlot.ToString(@"hh\:mm"),
+                        isFull = isBooked
+                    });
+
+                    // Bir sonraki slota geç
+                    currentSlot = currentSlot.Add(TimeSpan.FromMinutes(duration));
+                }
+            }
+
+            return Json(slots);
         }
     }
 }

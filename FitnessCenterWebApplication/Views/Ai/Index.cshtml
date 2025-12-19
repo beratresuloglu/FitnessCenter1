@@ -1,0 +1,104 @@
+﻿@model FitnessCenterWebApplication.Models.ViewModels.AiTrainerViewModel
+
+@{
+    ViewData["Title"] = "AI Personal Trainer";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card shadow border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-robot me-2"></i>AI Antrenörüne Danış</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Vücut bilgilerinizi girin, Yapay Zeka size özel plan hazırlasın.</p>
+
+                    <form asp-action="GeneratePlan" method="post">
+                        <div class="row g-2">
+                            <div class="col-6 mb-2">
+                                <label class="form-label fw-bold">Yaş</label>
+                                <input asp-for="Age" class="form-control" placeholder="Örn: 25" />
+                                <span asp-validation-for="Age" class="text-danger"></span>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label fw-bold">Cinsiyet</label>
+                                <select asp-for="Gender" class="form-select">
+                                    <option value="Erkek">Erkek</option>
+                                    <option value="Kadın">Kadın</option>
+                                </select>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label fw-bold">Boy (cm)</label>
+                                <input asp-for="Height" class="form-control" placeholder="180" />
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label fw-bold">Kilo (kg)</label>
+                                <input asp-for="Weight" class="form-control" placeholder="75" />
+                            </div>
+
+                            <div class="col-12 mb-2">
+                                <label class="form-label fw-bold">Hareket Seviyesi</label>
+                                <select asp-for="ActivityLevel" class="form-select">
+                                    <option value="Hareketsiz (Masa başı)">Hareketsiz (Masa başı)</option>
+                                    <option value="Az Hareketli (Haftada 1-2 gün spor)">Az Hareketli</option>
+                                    <option value="Aktif (Haftada 3-4 gün spor)">Aktif</option>
+                                    <option value="Çok Aktif (Profesyonel)">Çok Aktif</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">Hedefiniz Nedir?</label>
+                                <textarea asp-for="Goal" class="form-control" rows="2" placeholder="Örn: Yaza kadar 5 kilo vermek ve karın kası yapmak istiyorum..."></textarea>
+                                <span asp-validation-for="Goal" class="text-danger"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-dark w-100 py-2">
+                                <i class="fas fa-magic me-2"></i>Planı Oluştur
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            @if (!string.IsNullOrEmpty(Model.AiResponse))
+            {
+                <div class="card shadow border-0 h-100">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">📋 Senin İçin Hazırlanan Plan</h5>
+                        <i class="fas fa-dumbbell text-warning"></i>
+                    </div>
+                    <div class="card-body bg-light" style="max-height: 600px; overflow-y: auto;">
+                        <div class="ai-response-text" style="white-space: pre-line; line-height: 1.6;">
+                            @Model.AiResponse
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-top p-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                            <small class="text-muted fst-italic">
+                                <i class="fas fa-info-circle me-1"></i> Tavsiye niteliğindedir, doktora danışınız.
+                            </small>
+
+                            <div class="d-flex align-items-center" title="Llama 3 Modeli kullanılıyor">
+                                <span class="badge bg-dark text-warning shadow-sm py-2 px-3 rounded-pill">
+                                    <i class="fas fa-bolt me-2"></i>Powered by <strong>Groq</strong>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="h-100 d-flex flex-column align-items-center justify-content-center text-muted border rounded bg-light p-5">
+                    <i class="fas fa-brain fa-4x mb-3 text-secondary opacity-50"></i>
+                    <h4>Henüz bir plan oluşturulmadı</h4>
+                    <p class="text-center">Sol taraftaki formu doldurup butona bastığınızda<br>size özel antrenman ve diyet programı burada görünecek.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

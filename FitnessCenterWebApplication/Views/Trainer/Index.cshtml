@@ -6,36 +6,27 @@
 
 <div class="container mt-4">
     <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="display-4 text-center mb-3">
-                <i class="fas fa-users me-2"></i>Eğitmenlerimiz
-            </h1>
-            <p class="text-center text-muted">Hedeflerinize ulaşmanızda size rehberlik edecek uzman kadromuz</p>
-        </div>
-    </div>
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-5 text-primary mb-0">
+                    <i class="fas fa-users me-2"></i>Eğitmenlerimiz
+                </h1>
+                <p class="text-muted mb-0">Uzman kadromuzla tanışın</p>
+            </div>
 
-    @if (User.IsInRole("Admin"))
-    {
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <a asp-action="Create" class="btn btn-success">
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Create" class="btn btn-success shadow-sm">
                     <i class="fas fa-user-plus me-1"></i>Yeni Eğitmen Ekle
                 </a>
-            </div>
+            }
         </div>
-    }
+    </div>
 
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
@@ -47,79 +38,76 @@
             {
                 <div class="col">
                     <div class="card h-100 shadow-sm hover-card @(!trainer.IsActive ? "border-danger" : "")">
-                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-user-tie me-2"></i>@trainer.FullName
-                            </h5>
-                            @if (!trainer.IsActive)
-                            {
-                                <span class="badge bg-danger">Pasif</span>
-                            }
-                        </div>
 
-                        <div class="card-body">
-                            <div class="text-center mb-3">
+                        <div class="card-header bg-white border-bottom-0 pt-4 text-center">
+                            <div class="position-relative d-inline-block">
                                 @if (!string.IsNullOrEmpty(trainer.ProfileImageUrl))
                                 {
-                                    <img src="@trainer.ProfileImageUrl" alt="@trainer.FullName" class="rounded-circle img-thumbnail mb-2" style="width: 100px; height: 100px; object-fit: cover;">
+                                    <img src="@trainer.ProfileImageUrl" alt="@trainer.FullName"
+                                         class="rounded-circle img-thumbnail shadow-sm"
+                                         style="width: 120px; height: 120px; object-fit: cover;">
                                 }
                                 else
                                 {
-                                    <div class="rounded-circle bg-light d-inline-flex justify-content-center align-items-center mb-2" style="width: 100px; height: 100px;">
+                                    <div class="rounded-circle bg-light d-inline-flex justify-content-center align-items-center shadow-sm"
+                                         style="width: 120px; height: 120px;">
                                         <i class="fas fa-user fa-3x text-secondary"></i>
                                     </div>
                                 }
-                                <p class="card-text text-muted small">@trainer.Bio</p>
+                                @if (!trainer.IsActive)
+                                {
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        Pasif
+                                    </span>
+                                }
                             </div>
+                            <h5 class="card-title mt-3 mb-1 fw-bold">@trainer.FullName</h5>
+                            <span class="badge bg-primary bg-opacity-10 text-primary">@trainer.Specialization</span>
+                        </div>
 
-                            <div class="service-details mt-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="text-muted">
-                                        <i class="fas fa-certificate me-1"></i>Uzmanlık:
-                                    </span>
-                                    <span class="fw-bold text-dark">@trainer.Specialization</span>
-                                </div>
+                        <div class="card-body pt-2">
+                            <p class="card-text text-muted small text-center px-2">
+                                @(trainer.Bio.Length > 100 ? trainer.Bio.Substring(0, 97) + "..." : trainer.Bio)
+                            </p>
 
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="text-muted">
-                                        <i class="fas fa-briefcase me-1"></i>Deneyim:
-                                    </span>
-                                    <span class="fw-bold text-success">@trainer.ExperienceYears Yıl</span>
-                                </div>
-
+                            <div class="d-flex justify-content-between align-items-center mt-3 border-top pt-3">
+                                <span class="small text-muted">
+                                    <i class="fas fa-briefcase me-1"></i>@trainer.ExperienceYears Yıl
+                                </span>
                                 @if (trainer.GymCenter != null)
                                 {
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-muted">
-                                            <i class="fas fa-building me-1"></i>Salon:
-                                        </span>
-                                        <span class="badge bg-info">@trainer.GymCenter.Name</span>
-                                    </div>
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="fas fa-building me-1"></i>@trainer.GymCenter.Name
+                                    </span>
                                 }
                             </div>
                         </div>
 
-                        <div class="card-footer bg-light">
-                            <div class="d-flex justify-content-between align-items-center w-100">
+                        <div class="card-footer bg-light border-top-0 p-3">
+                            <div class="d-grid gap-2">
 
                                 @if (User.IsInRole("Admin"))
                                 {
-                                    // SOL TARAFTA: Düzenle Butonu
-                                    <a asp-action="Edit" asp-route-id="@trainer.Id" class="btn btn-sm btn-outline-warning">
-                                        <i class="fas fa-edit"></i> Düzenle
+                                    <a asp-controller="TrainerAvailability" asp-action="Index" asp-route-trainerId="@trainer.Id"
+                                       class="btn btn-sm btn-info text-white">
+                                        <i class="fas fa-clock me-1"></i>Çalışma Saatleri
                                     </a>
 
-                                    // SAĞ TARAFTA: Sil Butonu
-                                    <a asp-action="Delete" asp-route-id="@trainer.Id" class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-trash"></i> Sil
-                                    </a>
+                                    <div class="d-flex gap-2">
+                                        <a asp-action="Edit" asp-route-id="@trainer.Id" class="btn btn-sm btn-outline-warning w-100">
+                                            <i class="fas fa-edit"></i> Düzenle
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@trainer.Id" class="btn btn-sm btn-outline-danger w-100">
+                                            <i class="fas fa-trash"></i> Sil
+                                        </a>
+                                    </div>
                                 }
                                 else if (User.Identity.IsAuthenticated)
                                 {
-                                    // Kullanıcılar için Randevu Butonu (trainerId gönderiyoruz)
-                                    // Eğer randevuyu "Hizmet" üzerinden alıyorsanız burayı "Detaylar" olarak değiştirebiliriz.
+                                    // Kullanıcılar için Randevu Butonu
+                                    // Not: Doğrudan Create sayfasına yönlendirip TrainerId'yi querystring ile taşıyoruz
                                     <a asp-controller="Appointment" asp-action="Create" asp-route-trainerId="@trainer.Id"
-                                       class="btn btn-sm btn-success ms-auto @(!trainer.IsActive ? "disabled" : "")">
+                                       class="btn btn-sm btn-success @(!trainer.IsActive ? "disabled" : "")">
                                         <i class="fas fa-calendar-check me-1"></i>Randevu Al
                                     </a>
                                 }
@@ -132,47 +120,20 @@
     }
     else
     {
-        <div class="row">
-            <div class="col-md-12">
-                <div class="alert alert-info text-center" role="alert">
-                    <i class="fas fa-user-slash fa-3x mb-3"></i>
-                    <h4>Henüz Eğitmen Bulunmuyor</h4>
-                    <p>Şu anda sistemde kayıtlı antrenör bulunmamaktadır.</p>
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <a asp-action="Create" class="btn btn-primary mt-2">
-                            <i class="fas fa-plus me-1"></i>İlk Eğitmeni Ekle
-                        </a>
-                    }
-                </div>
-            </div>
+        <div class="alert alert-info text-center py-5">
+            <i class="fas fa-user-slash fa-3x mb-3"></i>
+            <h4>Henüz Eğitmen Bulunmuyor</h4>
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Create" class="btn btn-primary mt-2">İlk Eğitmeni Ekle</a>
+            }
         </div>
     }
 </div>
 
 <style>
-    .hover-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-        .hover-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
-        }
-
-    .card-header {
-        border-bottom: 2px solid rgba(255,255,255,0.2);
-    }
-
-    .service-details {
-        border-top: 1px solid #e9ecef;
-        padding-top: 15px;
-    }
-
-    .badge {
-        font-size: 0.85rem;
-        padding: 0.4em 0.6em;
-    }
+    .hover-card { transition: transform 0.2s; }
+    .hover-card:hover { transform: translateY(-5px); }
 </style>
 
 @section Scripts {

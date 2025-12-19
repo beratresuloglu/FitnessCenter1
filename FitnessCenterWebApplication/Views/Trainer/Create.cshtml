@@ -66,9 +66,9 @@
                         <div class="row mb-3">
                             <div class="col-md-8">
                                 <label asp-for="Specialization" class="form-label fw-bold">
-                                    <i class="fas fa-certificate me-1"></i>Uzmanlık Alanı
+                                    <i class="fas fa-certificate me-1"></i>Unvan / Uzmanlık Başlığı
                                 </label>
-                                <input asp-for="Specialization" class="form-control" placeholder="Örn: Pilates, Bodybuilding, Yoga" />
+                                <input asp-for="Specialization" class="form-control" placeholder="Örn: Baş Antrenör, Yoga Eğitmeni" />
                                 <span asp-validation-for="Specialization" class="text-danger"></span>
                             </div>
                             <div class="col-md-4">
@@ -77,6 +77,39 @@
                                 </label>
                                 <input asp-for="ExperienceYears" type="number" class="form-control" placeholder="Örn: 5" />
                                 <span asp-validation-for="ExperienceYears" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold d-block">
+                                <i class="fas fa-list-check me-1"></i>Verebileceği Hizmetler
+                            </label>
+
+                            <div class="card p-3 bg-light border-0">
+                                <div class="row">
+                                    @if (ViewBag.Services != null)
+                                    {
+                                        @foreach (var service in (IEnumerable<FitnessCenterWebApplication.Models.Entities.Service>)ViewBag.Services)
+                                        {
+                                            <div class="col-md-4 mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="selectedServiceIds" value="@service.Id" id="service_@service.Id">
+                                                    <label class="form-check-label" for="service_@service.Id">
+                                                        @service.Name
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="text-muted">Sistemde kayıtlı hizmet bulunamadı.</div>
+                                    }
+                                </div>
+                                <small class="text-muted mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Eğitmenin vereceği dersleri buradan seçiniz.
+                                </small>
                             </div>
                         </div>
 

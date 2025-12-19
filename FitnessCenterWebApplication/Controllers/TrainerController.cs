@@ -29,15 +29,20 @@ namespace FitnessCenterWebApplication.Controllers
         }
 
         // GET: Trainer/Create - Sadece Admin
+        // GET: Trainer/Create - Sadece Admin
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
-            // GymCenter seçim listesini doldur
+            // 1. GymCenter Listesi (Dropdown için)
             ViewBag.GymCenters = new SelectList(
                 await _context.GymCenters.Where(g => g.IsActive).ToListAsync(),
                 "Id",
                 "Name"
             );
+
+            // 2. YENİ: Hizmet Listesi (Checkboxlar için)
+            // Aktif olan tüm hizmetleri çekip View'a gönderiyoruz
+            ViewBag.Services = await _context.Services.Where(s => s.IsActive).ToListAsync();
 
             return View();
         }
@@ -46,10 +51,10 @@ namespace FitnessCenterWebApplication.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(Trainer trainer)
+        // YENİ: int[] selectedServiceIds parametresini ekledik (Seçilen kutucukların ID'leri buraya gelecek)
+        public async Task<IActionResult> Create(Trainer trainer, int[] selectedServiceIds)
         {
-            // 1. Navigation Property'leri Validasyondan Çıkar
-            // Formdan bu nesneler gelmez, sadece ID'leri gelir veya hiç gelmez.
+            // Validasyon temizliği
             ModelState.Remove("GymCenter");
             ModelState.Remove("User");
             ModelState.Remove("TrainerServices");
@@ -60,25 +65,39 @@ namespace FitnessCenterWebApplication.Controllers
             {
                 trainer.IsActive = true;
                 trainer.CreatedDate = DateTime.Now;
+                if (trainer.HireDate == default) trainer.HireDate = DateTime.Now;
 
-                // Eğer formda işe giriş tarihi girilmediyse şu anı ata
-                if (trainer.HireDate == default)
-                    trainer.HireDate = DateTime.Now;
-
+                // 1. Önce Eğitmeni Kaydet (ID oluşması için)
                 _context.Add(trainer);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Eğitmen başarıyla eklendi!";
+                // 2. YENİ: Seçilen Hizmetleri TrainerService Tablosuna Ekle
+                if (selectedServiceIds != null && selectedServiceIds.Length > 0)
+                {
+                    foreach (var serviceId in selectedServiceIds)
+                    {
+                        var trainerService = new TrainerService
+                        {
+                            TrainerId = trainer.Id, // Yeni oluşan eğitmen ID'si
+                            ServiceId = serviceId,
+                            IsActive = true,
+                            AssignedDate = DateTime.Now
+                        };
+                        _context.TrainerServices.Add(trainerService);
+                    }
+                    // Değişiklikleri kaydet
+                    await _context.SaveChangesAsync();
+                }
+
+                TempData["Success"] = "Eğitmen ve hizmetleri başarıyla eklendi!";
                 return RedirectToAction(nameof(Index));
             }
 
-            // Hata varsa dropdown'ı tekrar doldur
-            ViewBag.GymCenters = new SelectList(
-                await _context.GymCenters.Where(g => g.IsActive).ToListAsync(),
-                "Id",
-                "Name",
-                trainer.GymCenterId
-            );
+            // Hata durumunda listeleri tekrar doldur
+            ViewBag.GymCenters = new SelectList(await _context.GymCenters.Where(g => g.IsActive).ToListAsync(), "Id", "Name", trainer.GymCenterId);
+
+            // Hizmet listesini de tekrar gönder (Hata alınırsa kutucuklar kaybolmasın)
+            ViewBag.Services = await _context.Services.Where(s => s.IsActive).ToListAsync();
 
             return View(trainer);
         }

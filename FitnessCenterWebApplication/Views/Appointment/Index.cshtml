@@ -6,19 +6,17 @@
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        @if (User.IsInRole("Admin")){
-            <div>
-                <h2 class="text-primary"><i class="fas fa-calendar-check me-2"></i>Randevular</h2>
-                <p class="text-muted mb-0">Tüm randevu taleplerini buradan takip edebilirsiniz.</p>
-            </div>
-        }
+        <div>
+            <h2 class="text-primary"><i class="fas fa-calendar-check me-2"></i>Randevular</h2>
+            <p class="text-muted mb-0">Tüm randevu taleplerini buradan takip edebilirsiniz.</p>
+        </div>
+
         @if (User.IsInRole("Member"))
         {
             <a asp-action="Create" class="btn btn-success shadow-sm">
                 <i class="fas fa-plus me-1"></i>Yeni Randevu Al
             </a>
         }
-  
     </div>
 
     @if (TempData["Success"] != null)
@@ -38,6 +36,7 @@
                             <th class="ps-4">Tarih</th>
                             <th>Saat</th>
                             <th>Hizmet</th>
+                            <th>Ücret</th>
                             <th>Antrenör</th>
                             <th>Üye</th>
                             <th>Durum</th>
@@ -58,13 +57,27 @@
                                     <td>
                                         <span class="badge bg-info text-dark">@item.Service?.Name</span>
                                     </td>
+
+                                    <td>
+                                        <span class="text-success fw-bold">
+                                            @item.TotalPrice.ToString("C2")
+                                        </span>
+                                    </td>
                                     <td>@item.Trainer?.FullName</td>
+
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width:30px; height:30px;">
-                                                <i class="fas fa-user text-secondary"></i>
+                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width:35px; height:35px;">
+                                                <i class="fas fa-user text-primary"></i>
                                             </div>
-                                            <span>@(item.Member?.User?.Email ?? "Üye Bilgisi Yok")</span>
+                                            <div>
+                                                <div class="fw-bold text-dark">
+                                                    @(item.Member?.FullName ?? "İsimsiz Üye")
+                                                </div>
+                                                <div class="small text-muted" style="font-size: 0.85rem;">
+                                                    @(item.Member?.User?.Email ?? item.Member?.Email ?? "-")
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                     <td>
@@ -78,7 +91,16 @@
                                         }
                                         else if (item.Status.ToString() == "Cancelled")
                                         {
-                                            <span class="badge bg-danger"><i class="fas fa-times me-1"></i>İptal</span>
+                                            <div class="d-flex flex-column align-items-start">
+                                                <span class="badge bg-danger mb-1"><i class="fas fa-times me-1"></i>İptal</span>
+
+                                                @if (!string.IsNullOrEmpty(item.CancellationReason))
+                                                {
+                                                    <small class="text-danger fw-bold" style="font-size: 0.75rem; max-width: 200px; white-space: normal;">
+                                                        <i class="fas fa-info-circle me-1"></i>@item.CancellationReason
+                                                    </small>
+                                                }
+                                            </div>
                                         }
                                         else
                                         {
@@ -90,7 +112,8 @@
 
                                             @if (User.IsInRole("Admin") && item.Status.ToString() == "Pending")
                                             {
-                                                <form asp-action="Approve" asp-route-id="@item.Id" method="get">
+                                                <form asp-action="Approve" asp-route-id="@item.Id" method="post">
+                                                    @Html.AntiForgeryToken()
                                                     <button type="submit" class="btn btn-sm btn-success" title="Onayla">
                                                         <i class="fas fa-check"></i>
                                                     </button>
@@ -107,13 +130,6 @@
                                                     <i class="fas fa-ban"></i>
                                                 </button>
                                             }
-
-                                            @* @if (User.IsInRole("Admin"))
-                                            {
-                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="Sil">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            } *@
                                         </div>
                                     </td>
                                 </tr>
@@ -122,7 +138,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="7" class="text-center py-5 text-muted">
+                                <td colspan="8" class="text-center py-5 text-muted">
                                     <i class="fas fa-inbox fa-3x mb-3 text-secondary"></i><br />
                                     <h5>Henüz randevu kaydı bulunmamaktadır.</h5>
                                     <p>Yeni bir randevu oluşturmak için sağ üstteki butonu kullanabilirsiniz.</p>
@@ -144,6 +160,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form asp-action="Cancel" method="post">
+                @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <input type="hidden" name="id" id="cancelAppointmentId" />
                     <div class="mb-3">
@@ -162,9 +179,7 @@
 
 @section Scripts {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
     <script>
-        // İptal butonuna basıldığında ID'yi modala taşıyan script
         function setCancelModal(id) {
             document.getElementById('cancelAppointmentId').value = id;
         }

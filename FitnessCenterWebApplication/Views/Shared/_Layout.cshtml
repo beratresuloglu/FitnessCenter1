@@ -1,60 +1,187 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FitnessCenterWebApplication</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - Tiger Fitness Center</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/FitnessCenterWebApplication.styles.css" asp-append-version="true" />
+
+    <style>
+        :root {
+            --primary-yellow: #FFC107;
+            --primary-yellow-hover: #FFD54F;
+            --dark-bg: #212529;
+            --dark-text: #343a40;
+        }
+
+        /* 1. LAYOUT RESET: Çakışmaları önlemek için !important kullanıyoruz */
+        html, body {
+            height: auto !important; /* Yüksekliği serbest bırak */
+            min-height: 100vh; /* En az ekran boyu kadar olsun */
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            color: var(--dark-text);
+            /* Flexbox ile Sticky Footer Yapısı */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 2. İÇERİK ALANI: Footer'ı aşağı itecek */
+        .main-content {
+            flex: 1 0 auto; /* Boşluğu doldur */
+            padding-top: 20px;
+            padding-bottom: 40px; /* İçerik ile footer arası boşluk */
+            width: 100%;
+        }
+
+        /* 3. FOOTER AYARI: Absolute yerine Relative yapıyoruz */
+        footer {
+            flex-shrink: 0;
+            background-color: var(--dark-bg);
+            color: rgba(255,255,255,0.7);
+            padding: 20px 0;
+            width: 100%;
+            /* KRİTİK DÜZELTME: Varsayılan site.css ayarını eziyoruz */
+            position: relative !important;
+            bottom: auto !important;
+        }
+
+            footer a {
+                color: var(--primary-yellow);
+                text-decoration: none;
+                transition: color 0.3s;
+            }
+
+                footer a:hover {
+                    color: #fff;
+                }
+
+        /* Navbar Özelleştirme */
+        .navbar-custom {
+            background-color: var(--dark-bg);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 15px 0;
+        }
+
+            .navbar-custom .navbar-brand {
+                color: var(--primary-yellow) !important;
+                font-weight: 700;
+                font-size: 1.5rem;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+
+            .navbar-custom .nav-link {
+                color: rgba(255,255,255,0.8) !important;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                margin-left: 10px;
+            }
+
+                .navbar-custom .nav-link:hover,
+                .navbar-custom .nav-link.active {
+                    color: var(--primary-yellow) !important;
+                    transform: translateY(-2px);
+                }
+
+        /* Buton Stilleri */
+        .btn-primary, .btn-success {
+            background-color: var(--primary-yellow);
+            border-color: var(--primary-yellow);
+            color: #000;
+            font-weight: 600;
+        }
+
+            .btn-primary:hover, .btn-success:hover {
+                background-color: #e0a800;
+                border-color: #e0a800;
+                color: #000;
+            }
+
+        .btn-outline-primary {
+            color: var(--dark-bg);
+            border-color: var(--primary-yellow);
+        }
+
+            .btn-outline-primary:hover {
+                background-color: var(--primary-yellow);
+                color: #000;
+                border-color: var(--primary-yellow);
+            }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-secondary border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">FitnessCenterWebApplication</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/Images/Tigericon.png"
+                         alt="Kaplan Logo"
+                         style="height: 40px; width: 40px; margin-right: 10px; filter: invert(80%) sepia(80%) saturate(1000%) hue-rotate(350deg) brightness(105%) contrast(105%);">
+                    TIGER FITNESS
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
                 </button>
+
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
                         </li>
 
                         @if (User.IsInRole("Admin"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Service" asp-action="Index">Hizmetler</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Trainer" asp-action="Index">Eğitmenler</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Appointment" asp-action="Index">Randevu İşlemleri</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Admin">Admin Panel</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Yönetim
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Service" asp-action="Index">Hizmetler</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Trainer" asp-action="Index">Eğitmenler</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Appointment" asp-action="Index">Randevular</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-controller="Home" asp-action="Admin">Admin Panel</a></li>
+                                </ul>
                             </li>
                         }
+
                         @if (User.IsInRole("Member"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Service" asp-action="Index">Hizmetler</a>
+                                <a class="nav-link" asp-controller="Service" asp-action="Index">Hizmetler</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Trainer" asp-action="Index">Eğitmenler</a>
+                                <a class="nav-link" asp-controller="Trainer" asp-action="Index">Eğitmenler</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Appointment" asp-action="Index">Randevular</a>
+                                <a class="nav-link btn btn-outline-warning text-warning ms-2 px-3 py-1"
+                                   style="border: 1px solid #FFC107; border-radius: 20px;"
+                                   asp-controller="Appointment" asp-action="Index">
+                                    <i class="fas fa-calendar-alt me-1"></i>Randevularım
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Member">Member Panel</a>
+                                <a class="nav-link" asp-controller="Ai" asp-action="Index">
+                                    <i class="fas fa-robot me-1"></i>AI Coach
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Member">Profilim</a>
                             </li>
                         }
 
@@ -64,16 +191,26 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+    <div class="container main-content">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
-    <footer class="border-top footer text-muted">
+
+    <footer class="border-top footer text-center mt-auto">
         <div class="container">
-            &copy; 2025 - FitnessCenterWebApplication - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row">
+                <div class="col-md-12">
+                    <p class="mb-0">
+                        &copy; 2025 <strong>Tiger Fitness Center</strong> - Tüm Hakları Saklıdır. |
+                        <a asp-area="" asp-controller="Home" asp-action="Privacy">Gizlilik Politikası</a>
+                    </p>
+                </div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

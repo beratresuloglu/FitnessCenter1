@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http; // Gerekli
 
 namespace FitnessCenterWebApplication.Models.ViewModels
 {
@@ -13,15 +14,28 @@ namespace FitnessCenterWebApplication.Models.ViewModels
         [Required(ErrorMessage = "Boy alanı zorunludur (cm).")]
         public double Height { get; set; }
 
-        [Required(ErrorMessage = "Cinsiyet seçiniz.")]
-        public string Gender { get; set; }
+        public string Gender { get; set; } = "Erkek";
 
         [Required(ErrorMessage = "Hedefinizi belirtiniz.")]
-        public string Goal { get; set; } // Örn: Kilo vermek, Kas yapmak
+        public string Goal { get; set; }
 
-        public string? ActivityLevel { get; set; } // Hareketlilik seviyesi
+        public string? ActivityLevel { get; set; }
 
-        // AI'dan gelen cevabı burada tutacağız
-        public string? AiResponse { get; set; }
+        // --- YAPAY ZEKA ÇIKTILARI ---
+
+        // 1. Gemini'nin Metin Cevabı (Diyet/Program)
+        public string? AiTextResponse { get; set; }
+
+        // 2. DeepAI'ın Oluşturduğu "Sonraki Halin" Fotoğraf URL'i
+        public string? GeneratedImageUrl { get; set; }
+
+        // --- KULLANICININ YÜKLEDİĞİ FOTOĞRAF ---
+
+        [Display(Name = "Vücut Fotoğrafınız (Analiz için)")]
+        [Required(ErrorMessage = "Analiz için lütfen bir fotoğraf yükleyin.")]
+        public IFormFile? UserImageFile { get; set; }
+
+        // Yüklenen fotoyu ekranda göstermek için Base64 hali
+        public string? UserImageBase64 { get; set; }
     }
 }

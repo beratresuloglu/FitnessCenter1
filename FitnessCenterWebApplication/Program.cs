@@ -1,12 +1,43 @@
-using FitnessCenterWebApplication.Data;
+ï»¿using FitnessCenterWebApplication.Data;
 using FitnessCenterWebApplication.Models.Entities;
 using FitnessCenterWebApplication.Services;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ============================================================
+// ðŸ”§ TIMEOUT VE DOSYA YÃœKLEME AYARLARI (Ã–NEMLÄ°!)
+// ============================================================
+
+// Kestrel server timeout ayarlarÄ±
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+    options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5); // 5 dakika
+    options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(5); // 5 dakika
+});
+
+// IIS server ayarlarÄ± (IIS kullanÄ±yorsanÄ±z)
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+});
+
+// Form dosya yÃ¼kleme limitleri
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartHeadersLengthLimit = int.MaxValue;
+});
+
+// ============================================================
+// Identity AyarlarÄ±
+// ============================================================
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
@@ -22,42 +53,46 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// Add services to the container.
+// ============================================================
+// DiÄŸer Servisler
+// ============================================================
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// HttpClient Factory (Opsiyonel ama Ã¶nerilir)
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
+// ============================================================
+// Database Seed
+// ============================================================
 using (var scope = app.Services.CreateScope())
 {
     try
     {
-        // SeedService içindeki metodun "static" olduðu için direkt sýnýf adýyla çaðýrýyoruz.
-        // Not: SeedService metodun içeride kendi scope'unu yaratýyorsa app.Services göndermen doðru.
-        // Ancak genellikle scope burada yaratýlýr, servise gönderilir. 
-        // Senin önceki koduna göre þu kullaným doðrudur:
         await SeedService.SeedDatabase(app.Services);
     }
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Veritabaný seed edilirken bir hata oluþtu.");
+        logger.LogError(ex, "VeritabanÄ± seed edilirken bir hata oluÅŸtu.");
     }
 }
 
-// Configure the HTTP request pipeline.
+// ============================================================
+// Middleware Pipeline
+// ============================================================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

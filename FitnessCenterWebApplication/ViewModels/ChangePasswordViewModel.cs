@@ -17,7 +17,7 @@ namespace FitnessCenterWebApplication.ViewModels
         [Required(ErrorMessage = "Onay Şifresi kısmı boş bırakılamaz")]
         [DataType(DataType.Password)]
         [Display(Name = "Şifreyi onayla")]
-        [Compare("NewPassword", ErrorMessage = "Şifre ve Onay Şifresi eşleşmiyor.")] // Buraya dikkat: NewPassword ile karşılaştırmalı
-        public string ConfirmNewPassword { get; set; } // İsmi View ile aynı yaptık (ConfirmNewPassword)
+        [Compare("NewPassword", ErrorMessage = "Şifre ve Onay Şifresi eşleşmiyor.")] 
+        public string ConfirmNewPassword { get; set; } 
     }
 }

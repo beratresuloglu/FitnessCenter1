@@ -45,7 +45,6 @@ namespace FitnessCenterWebApplication.Models.Entities
 
         public DateTime? UpdatedDate { get; set; }
 
-        // Foreign Keys
         [Required]
         public int MemberId { get; set; }
 
@@ -55,7 +54,6 @@ namespace FitnessCenterWebApplication.Models.Entities
         [Required]
         public int ServiceId { get; set; }
 
-        // Navigation Properties
         [ForeignKey(nameof(MemberId))]
         public Member Member { get; set; } = null!;
 

@@ -18,7 +18,6 @@ namespace FitnessCenterWebApplication.Models.Entities
 
         public bool IsActive { get; set; } = true;
 
-        // Navigation Properties
         [ForeignKey(nameof(TrainerId))]
         public Trainer Trainer { get; set; } = null!;
 

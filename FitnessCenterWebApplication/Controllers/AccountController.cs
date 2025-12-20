@@ -1,4 +1,4 @@
-﻿using FitnessCenterWebApplication.Data; // AppDbContext için gerekli
+﻿using FitnessCenterWebApplication.Data; 
 using FitnessCenterWebApplication.Models.Entities;
 using FitnessCenterWebApplication.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -11,9 +11,8 @@ namespace FitnessCenterWebApplication.Controllers
         private readonly SignInManager<User> signInManager;
         private readonly UserManager<User> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
-        private readonly AppDbContext _context; // 1. EKLENDİ: Veritabanı erişimi için
+        private readonly AppDbContext _context; 
 
-        // Constructor güncellendi: AppDbContext eklendi
         public AccountController(SignInManager<User> signInManager,
                                  UserManager<User> userManager,
                                  RoleManager<IdentityRole> roleManager,
@@ -22,7 +21,7 @@ namespace FitnessCenterWebApplication.Controllers
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
-            this._context = context; // 1. ATAMA YAPILDI
+            this._context = context; 
         }
 
         [HttpGet]
@@ -65,11 +64,9 @@ namespace FitnessCenterWebApplication.Controllers
                 return View();
             }
 
-            // User oluşturma
             var user = new User
             {
                 FirstName = model.Name,
-                // Eğer ViewModel'de Soyad yoksa boş geçmemek için varsayılan atıyoruz
                 LastName = "",
                 NormalizedUserName = model.Email.ToUpper(),
                 Email = model.Email,
@@ -81,7 +78,6 @@ namespace FitnessCenterWebApplication.Controllers
 
             if (result.Succeeded)
             {
-                // Rol Atama İşlemleri
                 var roleExist = await roleManager.RoleExistsAsync("Member");
                 if (!roleExist)
                 {
@@ -90,24 +86,21 @@ namespace FitnessCenterWebApplication.Controllers
                 }
                 await userManager.AddToRoleAsync(user, "Member");
 
-                // 2. EKLENDİ: Otomatik Member (Üye) Kaydı Oluşturma
-                // Member tablosundaki zorunlu alanları (Required) doldurmamız şart.
                 var newMember = new Member
                 {
-                    UserId = user.Id, // Identity User ile ilişkilendiriyoruz (Çok Önemli!)
+                    UserId = user.Id, 
                     FirstName = user.FirstName,
-                    LastName = user.LastName ?? "Soyad Girilmedi", // Zorunlu alan hatası almamak için
+                    LastName = user.LastName ?? "Soyad Girilmedi", 
                     Email = user.Email,
-                    Phone = user.PhoneNumber ?? "5550000000", // Zorunlu alan. Kayıt formunda yoksa geçici değer.
+                    Phone = user.PhoneNumber ?? "5550000000", 
                     JoinDate = DateTime.Now,
                     IsActive = true,
-                    DateOfBirth = DateTime.Now.AddYears(-18), // Varsayılan tarih (Hata vermemesi için)
+                    DateOfBirth = DateTime.Now.AddYears(-18), 
                     Gender = "Belirtilmedi"
                 };
 
                 _context.Members.Add(newMember);
                 await _context.SaveChangesAsync();
-                // ---------------------------------------------------------
 
                 await signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Login", "Account");
@@ -129,7 +122,7 @@ namespace FitnessCenterWebApplication.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // ... Diğer metodlar (VerifyEmail, ChangePassword) aynen kalacak ...
+        
         [HttpGet]
         public IActionResult VerifyEmail()
         {

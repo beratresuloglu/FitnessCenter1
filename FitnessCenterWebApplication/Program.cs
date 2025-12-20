@@ -5,38 +5,40 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ============================================================
-// 🔧 TIMEOUT VE DOSYA YÜKLEME AYARLARI (ÖNEMLİ!)
+// 🔥 KRİTİK FIX: HTTPS'i tamamen devre dışı bırak
 // ============================================================
+builder.WebHost.UseUrls("http://localhost:5000"); // Sadece HTTP
 
-// Kestrel server timeout ayarları
+// ============================================================
+// TIMEOUT VE DOSYA AYARLARI
+// ============================================================
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
-    options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
-    options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5); // 5 dakika
-    options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(5); // 5 dakika
+    options.Limits.MaxRequestBodySize = 10 * 1024 * 1024;
+    options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(10);
+    options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(10);
 });
 
-// IIS server ayarları (IIS kullanıyorsanız)
 builder.Services.Configure<IISServerOptions>(options =>
 {
-    options.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+    options.MaxRequestBodySize = 10 * 1024 * 1024;
 });
 
-// Form dosya yükleme limitleri
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024;
     options.ValueLengthLimit = int.MaxValue;
     options.MultipartHeadersLengthLimit = int.MaxValue;
 });
 
+builder.Services.AddHttpClient();
+
 // ============================================================
-// Identity Ayarları
+// Identity
 // ============================================================
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
@@ -54,20 +56,34 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 
 // ============================================================
-// Diğer Servisler
+// 🔥 COOKIE FIX - Secure policy NONE
 // ============================================================
-builder.Services.AddControllersWithViews();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromHours(24);
+    options.SlidingExpiration = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.None; // HTTP için
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.LoginPath = "/Account/Login";
+});
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.None; // HTTP için
+});
+
+builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options =>
    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// HttpClient Factory (Opsiyonel ama önerilir)
-builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
 // ============================================================
-// Database Seed
+// Seed
 // ============================================================
 using (var scope = app.Services.CreateScope())
 {
@@ -78,22 +94,28 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Veritabanı seed edilirken bir hata oluştu.");
+        logger.LogError(ex, "Veritabanı seed hatası");
     }
 }
 
 // ============================================================
-// Middleware Pipeline
+// Middleware - HTTPS YOK!
 // ============================================================
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// HTTPS redirection KALDIRILDI!
+// app.UseHttpsRedirection(); // ← KAPALI
+
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 

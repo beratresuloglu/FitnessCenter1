@@ -13,13 +13,11 @@ namespace FitnessCenterWebApplication.Controllers
     {
         private readonly AppDbContext _context;
 
-        // Constructor ile Dependency Injection
         public ServiceController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: Service/Index - Tüm hizmetleri listele
         public async Task<IActionResult> Index()
         {
             var serviceList = await _context.Services
@@ -30,7 +28,6 @@ namespace FitnessCenterWebApplication.Controllers
             return View(serviceList);
         }
 
-        // GET: Service/Create - Sadece Admin
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
@@ -43,20 +40,15 @@ namespace FitnessCenterWebApplication.Controllers
             return View();
         }
 
-        // POST: Service/Create
-        // POST: Service/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(Service service)
         {
-            // ÇÖZÜM BURADA: GymCenter navigation property'sini doğrulamadan çıkarıyoruz.
-            // Çünkü formdan GymCenter nesnesi gelmez, sadece GymCenterId gelir.
             ModelState.Remove("GymCenter");
 
             if (!ModelState.IsValid)
             {
-                // Hata varsa dropdown'ı tekrar doldur
                 ViewBag.GymCenters = new SelectList(
                     await _context.GymCenters
                         .Where(g => g.IsActive)
@@ -80,7 +72,6 @@ namespace FitnessCenterWebApplication.Controllers
         }
 
 
-        // GET: Service/Edit/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -88,19 +79,14 @@ namespace FitnessCenterWebApplication.Controllers
 
             if (service == null)
             {
-                return NotFound(); // Hizmet bulunamazsa hata dön
+                return NotFound();
             }
 
-            // 2. Dropdown (Spor Salonu Seçimi) için veriyi tekrar yükle
-            // Not: Burası Create metodundaki ile aynı olmalı
             ViewBag.GymCenters = new SelectList(_context.GymCenters, "Id", "Name", service.GymCenterId);
 
-            // 3. Bulunan hizmeti View'a gönder (Bu adım inputların dolmasını sağlar)
             return View(service);
         }
 
-        // POST: Service/Edit/5
-        // POST: Service/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
@@ -111,19 +97,12 @@ namespace FitnessCenterWebApplication.Controllers
                 return NotFound();
             }
 
-            // 1. Validasyon Sorununu Çözme
-            // Create metodunda olduğu gibi, formdan GymCenter nesnesi gelmediği için
-            // doğrulama hatası almamak adına onu ModelState'den siliyoruz.
             ModelState.Remove("GymCenter");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // 2. Veri Bütünlüğünü Koruma (Best Practice)
-                    // Doğrudan _context.Update(service) kullanmak yerine, önce veritabanındaki 
-                    // mevcut kaydı çekiyoruz. Böylece formda olmayan (CreatedDate gibi)
-                    // alanların sıfırlanmasını engelliyoruz.
 
                     var existingService = await _context.Services.FindAsync(id);
 
@@ -132,15 +111,12 @@ namespace FitnessCenterWebApplication.Controllers
                         return NotFound();
                     }
 
-                    // Sadece değişen alanları güncelliyoruz
                     existingService.Name = service.Name;
                     existingService.Description = service.Description;
                     existingService.DurationMinutes = service.DurationMinutes;
                     existingService.Price = service.Price;
                     existingService.GymCenterId = service.GymCenterId;
 
-                    // Not: IsActive ve CreatedDate alanlarına dokunmuyoruz,
-                    // böylece eski değerlerini koruyorlar.
 
                     _context.Update(existingService);
                     await _context.SaveChangesAsync();
@@ -161,7 +137,6 @@ namespace FitnessCenterWebApplication.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Hata durumunda dropdown'ı tekrar doldur
             ViewBag.GymCenters = new SelectList(
                 await _context.GymCenters.Where(g => g.IsActive).ToListAsync(),
                 "Id",
@@ -172,8 +147,6 @@ namespace FitnessCenterWebApplication.Controllers
             return View(service);
         }
 
-        // GET: Service/Delete/5
-        // Silme onay sayfasını getirir
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -183,7 +156,7 @@ namespace FitnessCenterWebApplication.Controllers
             }
 
             var service = await _context.Services
-                .Include(s => s.GymCenter) // İlişkili veriyi de getir (Ekranda göstermek için)
+                .Include(s => s.GymCenter) 
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (service == null)
@@ -194,25 +167,17 @@ namespace FitnessCenterWebApplication.Controllers
             return View(service);
         }
 
-        // POST: Service/Delete/5
-        // Asıl silme (pasife alma) işleminin yapıldığı yer
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            // Silinecek kaydı bul
             var service = await _context.Services.FindAsync(id);
 
             if (service != null)
             {
-                // HARD DELETE YERİNE SOFT DELETE YAPIYORUZ
-                // _context.Services.Remove(service); // Bu satırı kullanmıyoruz!
-
-                // Durumu False yapıyoruz
                 service.IsActive = false;
 
-                // Güncellendi olarak işaretle
                 _context.Update(service);
 
                 await _context.SaveChangesAsync();

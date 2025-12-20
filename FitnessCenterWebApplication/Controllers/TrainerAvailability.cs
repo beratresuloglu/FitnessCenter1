@@ -35,7 +35,6 @@ namespace FitnessCenterWebApplication.Controllers
         [HttpGet]
         public IActionResult Create(int trainerId)
         {
-            // Günleri Türkçe göstermek için manuel liste oluşturuyoruz
             ViewBag.Days = new List<SelectListItem>
             {
                 new SelectListItem { Value = "1", Text = "Pazartesi" },
@@ -47,7 +46,6 @@ namespace FitnessCenterWebApplication.Controllers
                 new SelectListItem { Value = "0", Text = "Pazar" }
             };
 
-            // TrainerId'yi View'a taşıyoruz ki form gönderirken kaybolmasın
             var model = new TrainerAvailability { TrainerId = trainerId };
             return View(model);
         }
@@ -56,28 +54,23 @@ namespace FitnessCenterWebApplication.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TrainerAvailability availability)
         {
-            // HATA ÇÖZÜMÜ BURADA:
-            // Formdan "Trainer" nesnesi gelmiyor, sadece ID geliyor. 
-            // Bu yüzden Trainer nesnesini validasyon kontrolünden çıkarıyoruz.
             ModelState.Remove("Trainer");
 
             if (ModelState.IsValid)
             {
-                // Mantıksal Kontrol: Bitiş saati başlangıçtan önce olamaz
                 if (availability.EndTime <= availability.StartTime)
                 {
                     ModelState.AddModelError("", "Bitiş saati, başlangıç saatinden büyük olmalıdır.");
                 }
                 else
                 {
-                    availability.IsActive = true; // Varsayılan olarak aktif
+                    availability.IsActive = true; 
                     _context.Add(availability);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index), new { trainerId = availability.TrainerId });
                 }
             }
 
-            // Hata varsa gün listesini tekrar doldur
             ViewBag.Days = new List<SelectListItem>
             {
                 new SelectListItem { Value = "1", Text = "Pazartesi" },

@@ -32,7 +32,6 @@ namespace FitnessCenterWebApplication.Models.Entities
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
-        // Navigation Properties
         public ICollection<Service> Services { get; set; } = new List<Service>();
         public ICollection<Trainer> Trainers { get; set; } = new List<Trainer>();
     }

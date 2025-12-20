@@ -17,17 +17,14 @@ namespace FitnessCenterWebApplication.Services
 
             try
             {
-                // Ensure the database is ready
                 logger.LogInformation("Ensuring the database is created");
                 await context.Database.MigrateAsync();
 
-                // Add roles
                 logger.LogInformation("Seeding roles");
                 await AddRolesAsync(roleManager, "Admin");
                 await AddRolesAsync(roleManager, "User");
                 await AddRolesAsync(roleManager, "Trainer");
 
-                // Add Admin user
                 logger.LogInformation("Seeding admin user");
                 var adminEmail = "b231210050@sakarya.edu.tr";
                 User adminUser = null;
@@ -64,39 +61,30 @@ namespace FitnessCenterWebApplication.Services
                     adminUser = await userManager.FindByEmailAsync(adminEmail);
                 }
 
-                // Seed GymCenter
                 logger.LogInformation("Seeding gym center");
                 await SeedGymCenter(context);
 
-                // Seed Sample Users
                 logger.LogInformation("Seeding sample users");
                 var sampleUsers = await SeedSampleUsers(userManager, logger);
 
-                // Seed Members
                 logger.LogInformation("Seeding members");
                 await SeedMembers(context, sampleUsers);
 
-                // Seed Services
                 logger.LogInformation("Seeding services");
                 await SeedServices(context);
 
-                // Seed Trainers
                 logger.LogInformation("Seeding trainers");
                 await SeedTrainers(context, userManager, logger);
 
-                // Seed Trainer Availabilities
                 logger.LogInformation("Seeding trainer availabilities");
                 await SeedTrainerAvailabilities(context);
 
-                // Seed Trainer Services
                 logger.LogInformation("Seeding trainer services");
                 await SeedTrainerServices(context);
 
-                // Seed Appointments
                 logger.LogInformation("Seeding appointments");
                 await SeedAppointments(context);
 
-                // Seed Workout Plans
                 logger.LogInformation("Seeding workout plans");
                 await SeedWorkoutPlans(context);
 
@@ -340,7 +328,6 @@ namespace FitnessCenterWebApplication.Services
             {
                 var gymCenter = await context.GymCenters.FirstAsync();
 
-                // Trainer users
                 var trainerEmails = new[]
                 {
                     "emre.yilmaz@fitlife.com.tr",
@@ -443,7 +430,6 @@ namespace FitnessCenterWebApplication.Services
 
                 foreach (var trainer in trainers)
                 {
-                    // Pazartesi - Cuma arası müsaitlik
                     for (int day = 1; day <= 5; day++)
                     {
                         availabilities.Add(new TrainerAvailability
@@ -467,7 +453,6 @@ namespace FitnessCenterWebApplication.Services
                         });
                     }
 
-                    // Cumartesi
                     availabilities.Add(new TrainerAvailability
                     {
                         TrainerId = trainer.Id,
@@ -492,7 +477,6 @@ namespace FitnessCenterWebApplication.Services
                 var services = await context.Services.ToListAsync();
                 var trainerServices = new List<TrainerService>();
 
-                // İlk antrenör - Kişisel antrenörlük, Crossfit
                 trainerServices.Add(new TrainerService
                 {
                     TrainerId = trainers[0].Id,
@@ -508,7 +492,6 @@ namespace FitnessCenterWebApplication.Services
                     IsActive = true
                 });
 
-                // İkinci antrenör - Yoga, Pilates
                 trainerServices.Add(new TrainerService
                 {
                     TrainerId = trainers[1].Id,
@@ -524,7 +507,6 @@ namespace FitnessCenterWebApplication.Services
                     IsActive = true
                 });
 
-                // Üçüncü antrenör - Crossfit, Zumba
                 trainerServices.Add(new TrainerService
                 {
                     TrainerId = trainers[2].Id,
@@ -565,7 +547,7 @@ namespace FitnessCenterWebApplication.Services
                             AppointmentDate = DateTime.Today.AddDays(1),
                             StartTime = new TimeSpan(10, 0, 0),
                             EndTime = new TimeSpan(11, 0, 0),
-                            Status = 0, // Pending
+                            Status = 0,
                             IsApproved = false,
                             TotalPrice = services[0].Price,
                             Notes = "İlk randevu",
@@ -579,7 +561,7 @@ namespace FitnessCenterWebApplication.Services
                             AppointmentDate = DateTime.Today.AddDays(2),
                             StartTime = new TimeSpan(14, 0, 0),
                             EndTime = new TimeSpan(15, 30, 0),
-                            Status = (AppointmentStatus)1, // Approved
+                            Status = (AppointmentStatus)1, 
                             IsApproved = true,
                             ApprovedDate = DateTime.Now,
                             TotalPrice = services[1].Price,
@@ -593,7 +575,7 @@ namespace FitnessCenterWebApplication.Services
                             AppointmentDate = DateTime.Today.AddDays(-3),
                             StartTime = new TimeSpan(16, 0, 0),
                             EndTime = new TimeSpan(17, 15, 0),
-                            Status = (AppointmentStatus)2, // Completed
+                            Status = (AppointmentStatus)2, 
                             IsApproved = true,
                             ApprovedDate = DateTime.Now.AddDays(-3),
                             TotalPrice = services[3].Price,

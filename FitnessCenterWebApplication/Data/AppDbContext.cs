@@ -11,7 +11,6 @@ namespace FitnessCenterWebApplication.Data
         {
         }
 
-        // DbSet tanımlamaları
         public DbSet<GymCenter> GymCenters { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Trainer> Trainers { get; set; }
@@ -25,7 +24,6 @@ namespace FitnessCenterWebApplication.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // GymCenter Configuration
             modelBuilder.Entity<GymCenter>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -34,7 +32,6 @@ namespace FitnessCenterWebApplication.Data
                 entity.HasIndex(e => e.Name);
             });
 
-            // Service Configuration
             modelBuilder.Entity<Service>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -47,7 +44,6 @@ namespace FitnessCenterWebApplication.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Trainer Configuration
             modelBuilder.Entity<Trainer>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -65,7 +61,6 @@ namespace FitnessCenterWebApplication.Data
                     .OnDelete(DeleteBehavior.SetNull);
             });
 
-            // Member Configuration
             modelBuilder.Entity<Member>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -82,7 +77,6 @@ namespace FitnessCenterWebApplication.Data
                 entity.HasIndex(e => e.Email);
             });
 
-            // Appointment Configuration
             modelBuilder.Entity<Appointment>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -107,7 +101,6 @@ namespace FitnessCenterWebApplication.Data
                 entity.HasIndex(e => new { e.MemberId, e.AppointmentDate });
             });
 
-            // TrainerAvailability Configuration
             modelBuilder.Entity<TrainerAvailability>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -120,7 +113,6 @@ namespace FitnessCenterWebApplication.Data
                 entity.HasIndex(e => new { e.TrainerId, e.DayOfWeek });
             });
 
-            // TrainerService Configuration (Many-to-Many)
             modelBuilder.Entity<TrainerService>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -135,11 +127,9 @@ namespace FitnessCenterWebApplication.Data
                     .HasForeignKey(e => e.ServiceId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Aynı antrenör aynı hizmeti birden fazla kez alamaz
                 entity.HasIndex(e => new { e.TrainerId, e.ServiceId }).IsUnique();
             });
 
-            // WorkoutPlan Configuration
             modelBuilder.Entity<WorkoutPlan>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -151,7 +141,6 @@ namespace FitnessCenterWebApplication.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // ApplicationUser Configuration
             modelBuilder.Entity<User>(entity =>
             {
                 entity.Property(e => e.FirstName).HasMaxLength(50);

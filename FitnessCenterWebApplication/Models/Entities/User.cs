@@ -10,7 +10,6 @@ namespace FitnessCenterWebApplication.Models.Entities
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public bool IsActive { get; set; } = true;
 
-        // Navigation Properties
         public Member? Member { get; set; }
         public Trainer? Trainer { get; set; }
     }

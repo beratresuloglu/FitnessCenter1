@@ -1,117 +1,60 @@
 ﻿@model FitnessCenterWebApplication.Models.ViewModels.AiTrainerViewModel
 
 @{
-    ViewData["Title"] = "Google AI Dönüşüm";
+    ViewData["Title"] = "AI Personal Trainer";
 }
 
-<style>
-    .nav-tabs .nav-link.active {
-        background-color: #fff;
-        border-bottom-color: transparent;
-        color: #ffc107;
-        font-weight: bold;
-    }
-
-    .nav-tabs .nav-link {
-        color: #495057;
-    }
-
-    .photo-card-img-container {
-        height: 350px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #212529;
-        overflow: hidden;
-    }
-
-        .photo-card-img-container img {
-            max-height: 100%;
-            max-width: 100%;
-            object-fit: contain;
-        }
-</style>
-
 <div class="container mt-4 mb-5">
-    <div class="text-center mb-5">
-        <h2 class="fw-bold"><span class="text-warning">Google AI</span> Fitness Analizi</h2>
-        <p class="text-muted">Gemini (Analiz) ve Imagen (Görselleştirme) destekli yapay zeka koçu.</p>
-    </div>
-
-    <div class="row g-4 justify-content-center">
-        <div class="col-lg-5">
-            <div class="card shadow-lg border-0 h-100">
-                <div class="card-header bg-dark text-warning py-3">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-camera-retro me-2"></i>Bilgilerini Gir</h5>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card shadow border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-robot me-2"></i>AI Antrenörüne Danış</h4>
                 </div>
-                <div class="card-body p-4">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2"></div>
+                <div class="card-body">
+                    <p class="text-muted small">Vücut bilgilerinizi girin, Yapay Zeka size özel plan hazırlasın.</p>
 
-                    <form asp-action="GenerateTransformation" method="post" enctype="multipart/form-data" id="aiForm">
-
-                        <div class="mb-4 text-center p-3 border rounded bg-light">
-                            <label asp-for="UserImageFile" class="form-label fw-bold text-dark mb-3 d-block">
-                                <i class="fas fa-cloud-upload-alt fa-3x text-warning mb-2"></i><br />
-                                Vücut Fotoğrafını Yükle
-                            </label>
-                            <input asp-for="UserImageFile" type="file" class="form-control" accept="image/*" required onchange="previewImage(this);" />
-                            <span asp-validation-for="UserImageFile" class="text-danger small"></span>
-                            <img id="imagePreview" src="#" class="img-thumbnail mt-3 d-none" style="max-height: 150px;" />
-                        </div>
-
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="Age" class="form-control" placeholder="Yaş" />
-                                    <label>Yaş</label>
-                                </div>
+                    <form asp-action="GeneratePlan" method="post">
+                        <div class="row g-2">
+                            <div class="col-6 mb-2">
+                                <label class="form-label fw-bold">Yaş</label>
+                                <input asp-for="Age" class="form-control" placeholder="Örn: 25" />
+                                <span asp-validation-for="Age" class="text-danger"></span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select asp-for="Gender" class="form-select">
-                                        <option value="Erkek">Erkek</option>
-                                        <option value="Kadın">Kadın</option>
-                                    </select>
-                                    <label>Cinsiyet</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="Height" class="form-control" placeholder="Boy" />
-                                    <label>Boy (cm)</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="Weight" class="form-control" placeholder="Kilo" />
-                                    <label>Kilo (kg)</label>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Hareket Seviyesi</label>
-                                <select asp-for="ActivityLevel" class="form-select">
-                                    <option value="Az Hareketli">Az Hareketli</option>
-                                    <option value="Aktif">Aktif</option>
-                                    <option value="Çok Aktif">Çok Aktif</option>
+                            <div class="col-6 mb-2">
+                                <label class="form-label fw-bold">Cinsiyet</label>
+                                <select asp-for="Gender" class="form-select">
+                                    <option value="Erkek">Erkek</option>
+                                    <option value="Kadın">Kadın</option>
                                 </select>
                             </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Hedef</label>
-                                <textarea asp-for="Goal" class="form-control" rows="2" placeholder="Örn: Kilo vermek..."></textarea>
+                            <div class="col-6 mb-2">
+                                <label class="form-label fw-bold">Boy (cm)</label>
+                                <input asp-for="Height" class="form-control" placeholder="180" />
                             </div>
-                        </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label fw-bold">Kilo (kg)</label>
+                                <input asp-for="Weight" class="form-control" placeholder="75" />
+                            </div>
 
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-warning w-100 py-3 fw-bold text-dark shadow-sm"
-                                    onclick="if(document.getElementById('aiForm').checkValidity()) {
-                                    var btn=this;
-                                    setTimeout(function() {
-                                    btn.disabled=true;
-                                    btn.innerHTML='<i class=\' fas fa-spinner fa-spin me-2\'>
-                                </i>Google Analiz Yapıyor...';
-                                }, 50);
-                                }">
-                                <i class="fas fa-magic me-2"></i>Analizi Başlat
+                            <div class="col-12 mb-2">
+                                <label class="form-label fw-bold">Hareket Seviyesi</label>
+                                <select asp-for="ActivityLevel" class="form-select">
+                                    <option value="Hareketsiz (Masa başı)">Hareketsiz (Masa başı)</option>
+                                    <option value="Az Hareketli (Haftada 1-2 gün spor)">Az Hareketli</option>
+                                    <option value="Aktif (Haftada 3-4 gün spor)">Aktif</option>
+                                    <option value="Çok Aktif (Profesyonel)">Çok Aktif</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">Hedefiniz Nedir?</label>
+                                <textarea asp-for="Goal" class="form-control" rows="2" placeholder="Örn: Yaza kadar 5 kilo vermek ve karın kası yapmak istiyorum..."></textarea>
+                                <span asp-validation-for="Goal" class="text-danger"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-dark w-100 py-2">
+                                <i class="fas fa-magic me-2"></i>Planı Oluştur
                             </button>
                         </div>
                     </form>
@@ -119,95 +62,43 @@
             </div>
         </div>
 
-        <div class="col-lg-7">
-            @if (!string.IsNullOrEmpty(Model.AiTextResponse))
+        <div class="col-md-7">
+            @if (!string.IsNullOrEmpty(Model.AiResponse))
             {
-                <div class="card shadow-lg border-0 h-100">
-                    <div class="card-header bg-white p-0">
-                        <ul class="nav nav-tabs nav-fill" role="tablist">
-                            <li class="nav-item">
-                                <button class="nav-link active py-3" data-bs-toggle="tab" data-bs-target="#program-content" type="button">Program</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link py-3" data-bs-toggle="tab" data-bs-target="#photo-content" type="button">Görsel Dönüşüm</button>
-                            </li>
-                        </ul>
+                <div class="card shadow border-0 h-100">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">📋 Senin İçin Hazırlanan Plan</h5>
+                        <i class="fas fa-dumbbell text-warning"></i>
                     </div>
-
-                    <div class="card-body bg-light tab-content p-4" style="min-height: 500px; overflow-y: auto;">
-                        <div class="tab-pane fade show active" id="program-content">
-                            <h4 class="fw-bold text-dark mb-3"><i class="fas fa-dumbbell text-warning me-2"></i>Google Gemini Analizi</h4>
-                            <div class="p-3 bg-white rounded shadow-sm" style="white-space: pre-line; line-height: 1.6;">
-                                @Model.AiTextResponse
-                            </div>
-                        </div>
-
-                        <div class="tab-pane fade" id="photo-content">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="card h-100 border-0 shadow-sm">
-                                        <div class="card-header bg-secondary text-white text-center">ŞİMDİ</div>
-                                        <div class="card-body p-2 bg-dark photo-card-img-container">
-                                            @if (!string.IsNullOrEmpty(Model.UserImageBase64))
-                                            {
-                                                <img src="@Model.UserImageBase64" class="img-fluid" />
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card h-100 border-0 shadow-sm">
-                                        <div class="card-header bg-success text-white text-center">HEDEF (Imagen 3)</div>
-                                        <div class="card-body p-2 bg-dark photo-card-img-container">
-                                            @if (!string.IsNullOrEmpty(Model.GeneratedImageUrl))
-                                            {
-                                                <img src="@Model.GeneratedImageUrl" class="img-fluid" />
-                                            }
-                                            else
-                                            {
-                                                <div class="text-white text-center p-4">
-                                                    <i class="fas fa-image fa-3x text-secondary mb-3"></i>
-                                                    <p>Görsel oluşturulamadı. (Google Imagen erişimi kısıtlı olabilir)</p>
-                                                </div>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="card-body bg-light" style="max-height: 600px; overflow-y: auto;">
+                        <div class="ai-response-text" style="white-space: pre-line; line-height: 1.6;">
+                            @Model.AiResponse
                         </div>
                     </div>
-                    <div class="card-footer bg-white py-2 text-end">
-                        <small class="text-muted fw-bold">Powered by Google Cloud (Gemini & Imagen)</small>
+                    <div class="card-footer bg-white border-top p-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                            <small class="text-muted fst-italic">
+                                <i class="fas fa-info-circle me-1"></i> Tavsiye niteliğindedir, doktora danışınız.
+                            </small>
+
+                            <div class="d-flex align-items-center" title="Llama 3 Modeli kullanılıyor">
+                                <span class="badge bg-dark text-warning shadow-sm py-2 px-3 rounded-pill">
+                                    <i class="fas fa-bolt me-2"></i>Powered by <strong>Groq</strong>
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             }
             else
             {
-                <div class="h-100 d-flex flex-column align-items-center justify-content-center text-muted border-2 border-dashed rounded bg-light p-5">
-                    <i class="fas fa-robot fa-5x text-warning mb-3"></i>
-                    <h3>Hazır mısın?</h3>
-                    <p>Fotoğrafını yükle, Google Gemini sana özel programı çıkarsın.</p>
+                <div class="h-100 d-flex flex-column align-items-center justify-content-center text-muted border rounded bg-light p-5">
+                    <i class="fas fa-brain fa-4x mb-3 text-secondary opacity-50"></i>
+                    <h4>Henüz bir plan oluşturulmadı</h4>
+                    <p class="text-center">Sol taraftaki formu doldurup butona bastığınızda<br>size özel antrenman ve diyet programı burada görünecek.</p>
                 </div>
             }
         </div>
     </div>
 </div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-    <script>
-        function previewImage(input) {
-            var preview = document.getElementById('imagePreview');
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.src = e.target.result;
-                    preview.classList.remove('d-none');
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-    </script>
-}

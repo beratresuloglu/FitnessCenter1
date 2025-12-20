@@ -32,11 +32,9 @@ namespace FitnessCenterWebApplication.Models.Entities
 
         public DateTime? LastModifiedDate { get; set; }
 
-        // Foreign Keys
         [Required]
         public int MemberId { get; set; }
 
-        // Navigation Properties
         [ForeignKey(nameof(MemberId))]
         public Member Member { get; set; } = null!;
     }

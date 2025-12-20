@@ -39,9 +39,8 @@ namespace FitnessCenterWebApplication.Models.Entities
         [StringLength(20)]
         public string? Gender { get; set; }
 
-        // Fitness bilgileri
-        public decimal? Height { get; set; } // cm
-        public decimal? Weight { get; set; } // kg
+        public decimal? Height { get; set; }
+        public decimal? Weight { get; set; }
 
         [NotMapped]
         public decimal? BMI => Height.HasValue && Weight.HasValue && Height > 0
@@ -58,11 +57,9 @@ namespace FitnessCenterWebApplication.Models.Entities
 
         public DateTime? MembershipExpiry { get; set; }
 
-        // Foreign Keys
         [Required]
         public string UserId { get; set; } = string.Empty;
 
-        // Navigation Properties
         [ForeignKey(nameof(UserId))]
         public User User { get; set; } = null!;
 
